@@ -1,8 +1,8 @@
 # This is a basic workflow
 name: linter
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
+# Controls when the action will run.
+# Triggers the workflow on push or pull request events but only for the master branch
 on:
   push:
     # Only invoke for push to main.
@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             python-version: '3.7'
           - os: ubuntu-24.04
             python-version: '3.8'

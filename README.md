@@ -1,9 +1,9 @@
-[![github](https://github.com/logsdail/carmm/actions/workflows/main.yml/badge.svg)](https://github.com/logsdail/carmm/actions)
-[![codecov.io](https://codecov.io/gh/logsdail/carmm/coverage.svg)](https://codecov.io/gh/logsdail/carmm)
+[![github](https://github.com/tamm-cci/carmm/actions/workflows/main.yml/badge.svg)](https://github.com/tamm-cci/carmm/actions)
+[![codecov.io](https://codecov.io/gh/tamm-cci/carmm/coverage.svg)](https://codecov.io/gh/tamm-cci/carmm)
 
 # Cardiff Molecular Modelling
 
-General scripts and software for everyday computational chemistry. Documentation of functionality is available at: https://logsdail.github.io/carmm/.
+General scripts and software for everyday computational chemistry. Documentation of functionality is available at: https://tamm-cci.github.io/carmm/.
 
 Folder names are designed to be self explanatory:
 
