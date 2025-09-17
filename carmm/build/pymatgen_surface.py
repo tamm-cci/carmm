@@ -85,6 +85,7 @@ def _save(surface, symmetric, layers, termination, path):
 	else:
 		symmetry = 'asym'
 	if os.path.exists(f'{path}/{symmetry}_slab{termination}_{layers}_layer'):
-		os.rmdir(f'{path}/{symmetry}_slab{termination}_{layers}_layer')
+		import shutil
+		shutil.rmtree(f'{path}/{symmetry}_slab{termination}_{layers}_layer')
 	os.mkdir(f'{path}/{symmetry}_slab{termination}_{layers}_layer')
 	surface.write(f'{path}/{symmetry}_slab{termination}_{layers}_layer/geometry.in')
