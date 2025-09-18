@@ -1,4 +1,4 @@
-def generate_pymatgen_surface(bulk_model, layers=2, symmetric=True, miller_index=(1,0,0), vacuum=20, spin=False, save=False, tol=0.01, path='/'):
+def generate_pymatgen_surface(bulk_model, layers=2, symmetric=True, miller_index=(1,0,0), vacuum=20, spin=False, save=False, tol=0.01, path='./'):
 	'''
 
 	Function to create slab models for different facets using pymatgen. This is particularly useful to create slabs
@@ -11,7 +11,7 @@ def generate_pymatgen_surface(bulk_model, layers=2, symmetric=True, miller_index
 	bulk_model: Atoms object
 		provide the unit cell and make sure this is the conventional bulk unit cell
 	layers: int
-		specify the repeating layers along the direction defined in 'axis' of the 'center' function
+		specify the repeating layers along the direction perpendicular to the plane of the desired facet
 	symmetric: boolean
 		Whether you want the slab model to be symmetric. Note: this parameter should always be set to 'True' (unless
 		asymmetric slabs are needed in special cases) as Tasker classification states that asymmetric slabs are inherently
