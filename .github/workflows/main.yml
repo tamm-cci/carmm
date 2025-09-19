@@ -91,9 +91,9 @@ jobs:
 
     # Upload all the data on coverage to CodeCov
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@main
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+        #token: ${{ secrets.CODECOV_TOKEN }}
         file: ./examples/coverage.xml
         flags: unittests
     
