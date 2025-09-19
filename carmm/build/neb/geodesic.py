@@ -55,7 +55,7 @@ class GeodesicInterpolator:
         self.pbc = self.initial.pbc
         self.path_len = path_len
 
-        # Check constraints - only honour fixed atoms 
+        # Check constraints - only honour fixed atoms
         constraints = self.initial.constraints
 
         self.fixed = []
