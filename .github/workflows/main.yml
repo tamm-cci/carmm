@@ -94,6 +94,6 @@ jobs:
       uses: codecov/codecov-action@main
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./examples/coverage.xml
+        files: ./examples/coverage.xml
         flags: unittests
     
