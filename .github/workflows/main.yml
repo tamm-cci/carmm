@@ -35,11 +35,11 @@ jobs:
     steps:
     
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@main
     
     # Ensure we are running Python v3.x
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@main
       with:
         python-version: ${{ matrix.python-version }}
     
