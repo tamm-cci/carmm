@@ -11,7 +11,11 @@ def generate_pymatgen_surface(bulk_model, layers=2, symmetric=True, miller_index
 	bulk_model: Atoms object
 		provide the unit cell and make sure this is the conventional bulk unit cell
 	layers: int
-		specify the repeating layers along the direction perpendicular to the plane of the desired facet
+		specify the repeating layers along the direction perpendicular to the plane of the desired facet. This basically
+		defines the thickness of the slab.
+		Note: It is important to note that the definition of a layer in pymatgen depends on the primitive slab unit cell
+		and does not represent an atomic layer (like ASE). Please check the thickness the slab generated using this
+		functionality and make sure it is as desired before running any calculations.
 	symmetric: boolean
 		Whether you want the slab model to be symmetric. Note: this parameter should always be set to 'True' (unless
 		asymmetric slabs are needed in special cases) as Tasker classification states that asymmetric slabs are inherently
@@ -30,7 +34,7 @@ def generate_pymatgen_surface(bulk_model, layers=2, symmetric=True, miller_index
 	tol: float
 		the tolerance value decides how many terminations are generated for a given facet. A very small value of tolerance
 		(for example 0.001) can lead to unphysical terminations. In most cases, the value 0.01 is sufficient to enumerate
-		over all terminations
+		over all terminations.
 	path: str
 		path to save the folders for slabs
 
