@@ -21,20 +21,20 @@ def test_build_pymatgen_surface():
     #### Assertion tests ####
     from ase.io import read
 
-    # ### checking slab termination
-    # atoms = read('data/sym_slab0_8_layer/geometry.in')
-    # z_coordinates = atoms.get_positions()[:,2]
-    # import numpy as np
-    # # the top and bottom atom must be oxygen as it is an oxygen terminated slab
-    # assert atoms[np.argmax(z_coordinates)].symbol == 'O'
-    # assert atoms[np.argmin(z_coordinates)].symbol == 'O'
-    #
-    # atoms = read('data/sym_slab1_8_layer/geometry.in')
-    # z_coordinates = atoms.get_positions()[:, 2]
-    # import numpy as np
-    # # Here, the top and bottom atom must be Mg as it is a Magnesium terminated slab
-    # assert atoms[np.argmax(z_coordinates)].symbol == 'Mg'
-    # assert atoms[np.argmin(z_coordinates)].symbol == 'Mg'
+    ### checking slab termination
+    atoms = read('data/sym_slab0_8_layer/geometry.in')
+    z_coordinates = atoms.get_positions()[:,2]
+    import numpy as np
+    # the top and bottom atom must be oxygen as it is an oxygen terminated slab
+    assert atoms[np.argmax(z_coordinates)].symbol == 'O'
+    assert atoms[np.argmin(z_coordinates)].symbol == 'O'
+
+    atoms = read('data/sym_slab1_8_layer/geometry.in')
+    z_coordinates = atoms.get_positions()[:, 2]
+    import numpy as np
+    # Here, the top and bottom atom must be Mg as it is a Magnesium terminated slab
+    assert atoms[np.argmax(z_coordinates)].symbol == 'Mg'
+    assert atoms[np.argmin(z_coordinates)].symbol == 'Mg'
 
     assert(len(atoms) == 15)
 
