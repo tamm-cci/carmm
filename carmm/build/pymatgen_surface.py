@@ -1,4 +1,5 @@
-def generate_pymatgen_surface(bulk_model, layers=2, symmetric=True, miller_index=(1,0,0), vacuum=20, spin=False, save=False, tol=0.01, path='./'):
+def generate_pymatgen_surface(bulk_model, layers=2, symmetric=True, miller_index=(1,0,0), vacuum=20, spin=False,
+							  save=False, tol=0.01, path='./'):
 	'''
 
 	Function to create slab models for different facets using pymatgen. This is particularly useful to create slabs
