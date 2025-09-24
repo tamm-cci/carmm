@@ -98,6 +98,6 @@ def _save(surface, symmetric, layers, termination, path, file_format='in'):
 	os.mkdir(f'{path}/{symmetry}_slab{termination}_{layers}_layer')
 	try:
 		surface.write(f'{path}/{symmetry}_slab{termination}_{layers}_layer/geometry.{file_format}')
-	except Exception as e:
-		print(e)
-		print('The error might be due to unsupported file format. Please check ASE\'s documentation for supported file format.')
+	except Exception as e: # pragma: no cover
+		print(e) # pragma: no cover
+		print('The error might be due to unsupported file format. Please check ASE\'s documentation for supported file format.') # pragma: no cover
