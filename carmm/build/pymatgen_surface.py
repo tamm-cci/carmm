@@ -1,5 +1,5 @@
 def generate_pymatgen_surface(bulk_model, layers=2, symmetric=True, miller_index=(1,0,0), vacuum=20, spin=False,
-							  save=False, tol=0.01, path='./'):
+							  save=False, tol=0.01, path='./', file_format='in'):
 	'''
 
 	Function to create slab models for different facets using pymatgen. This is particularly useful to create slabs
@@ -38,6 +38,9 @@ def generate_pymatgen_surface(bulk_model, layers=2, symmetric=True, miller_index
 		over all terminations.
 	path: str
 		path to save the folders for slabs
+	file_format: str
+		specify the file format for saving the slab model. Note that the format provided has to be compatible with ASE
+		file io writer. Please check ASE's documentation for supported file format.
 
 	'''
 
@@ -61,11 +64,11 @@ def generate_pymatgen_surface(bulk_model, layers=2, symmetric=True, miller_index
 		surface.center(vacuum=vacuum, axis=2)
 		surface.wrap()
 		if save:
-			_save(surface, symmetric, layers, j, path)
+			_save(surface, symmetric, layers, j, path, file_format)
 
 	return slabs
 
-def _save(surface, symmetric, layers, termination, path):
+def _save(surface, symmetric, layers, termination, path, file_format='in'):
 	'''
 	Method to save the generated slab models to a .in file by creating different folders for different terminations and
 	thickness; hidden from user
@@ -93,4 +96,8 @@ def _save(surface, symmetric, layers, termination, path):
 		import shutil
 		shutil.rmtree(f'{path}/{symmetry}_slab{termination}_{layers}_layer')
 	os.mkdir(f'{path}/{symmetry}_slab{termination}_{layers}_layer')
-	surface.write(f'{path}/{symmetry}_slab{termination}_{layers}_layer/geometry.in')
+	try:
+		surface.write(f'{path}/{symmetry}_slab{termination}_{layers}_layer/geometry.{file_format}')
+	except Exception as e:
+		print(e)
+		print('The error might be due to unsupported file format. Please check ASE\'s documentation for supported file format.')
