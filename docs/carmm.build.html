@@ -514,6 +514,53 @@ periodic: Atoms object</p>
 </dd></dl>
 
 </section>
+<section id="module-carmm.build.pymatgen_surface">
+<span id="carmm-build-pymatgen-surface-module"></span><h2>carmm.build.pymatgen_surface module<a class="headerlink" href="#module-carmm.build.pymatgen_surface" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="carmm.build.pymatgen_surface.generate_pymatgen_surface">
+<span class="sig-prename descclassname"><span class="pre">carmm.build.pymatgen_surface.</span></span><span class="sig-name descname"><span class="pre">generate_pymatgen_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bulk_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miller_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vacuum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'in'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#carmm.build.pymatgen_surface.generate_pymatgen_surface" title="Link to this definition">¶</a></dt>
+<dd><p>Function to create slab models for different facets using pymatgen. This is particularly useful to create slabs
+for multi component bulk like oxides, sulphides, pervoskites, etc. In such cases, a given facet can have
+multiple terminations and this functionality enumerates over all possible terminations. For example, a metal oxide
+having formula MO can have an M-termination or an O-termination.</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>bulk_model: Atoms object</dt><dd><p>provide the unit cell and make sure this is the conventional bulk unit cell</p>
+</dd>
+<dt>layers: int</dt><dd><p>specify the repeating layers along the direction perpendicular to the plane of the desired facet. This basically
+defines the thickness of the slab.
+Note: It is important to note that the definition of a layer in pymatgen depends on the primitive slab unit cell
+and does not represent an atomic layer (like ASE). Please check the thickness the slab generated using this
+functionality and make sure it is as desired before running any calculations.</p>
+</dd>
+<dt>symmetric: boolean</dt><dd><p>Whether you want the slab model to be symmetric. Note: this parameter should always be set to ‘True’ (unless
+asymmetric slabs are needed in special cases) as Tasker classification states that asymmetric slabs are inherently
+unstable.</p>
+</dd>
+<dt>miller_index: tuple</dt><dd><p>specify facet required as a tuple</p>
+</dd>
+<dt>vacuum: float</dt><dd><p>specifies the vacuum addition to the slab in the direction of ‘axis-’ of the ‘center’ function</p>
+</dd>
+<dt>spin: boolean</dt><dd><p>specify whether the bulk geometry Atoms object has specified spin moments on atoms</p>
+</dd>
+<dt>save: boolean</dt><dd><p>specifies whether the generated surfaces should be saved as .in files. If set to True, the
+function will save the generated files in different folder. Each folder will have a slab model which
+corresponds to a given slab thickness (layers), termination and symmetry. The folder name will have the format
+{symmetric}_slab_{termination}_{n}_layers</p>
+</dd>
+<dt>tol: float</dt><dd><p>the tolerance value decides how many terminations are generated for a given facet. A very small value of tolerance
+(for example 0.001) can lead to unphysical terminations. In most cases, the value 0.01 is sufficient to enumerate
+over all terminations.</p>
+</dd>
+<dt>path: str</dt><dd><p>path to save the folders for slabs</p>
+</dd>
+<dt>file_format: str</dt><dd><p>specify the file format for saving the slab model. Note that the format provided has to be compatible with ASE
+file io writer. Please check ASE’s documentation for supported file format.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="module-carmm.build.slab_consistent_bulk_generator">
 <span id="carmm-build-slab-consistent-bulk-generator-module"></span><h2>carmm.build.slab_consistent_bulk_generator module<a class="headerlink" href="#module-carmm.build.slab_consistent_bulk_generator" title="Link to this heading">¶</a></h2>
 <dl class="py function">

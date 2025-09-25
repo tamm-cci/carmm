@@ -52,6 +52,14 @@ carmm.build.facets module
    :undoc-members:
    :show-inheritance:
 
+carmm.build.pymatgen\_surface module
+------------------------------------
+
+.. automodule:: carmm.build.pymatgen_surface
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 carmm.build.slab\_consistent\_bulk\_generator module
 ----------------------------------------------------
 
