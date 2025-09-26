@@ -15,7 +15,7 @@ def appending(surface, bulk, nlayers=None, sep=0.0, vac=10.0, output="apended.tr
     Returns:
     """
     
-    from ase.io import read, write
+    from ase.io import read
     import numpy as np
 
     # Defining surface
