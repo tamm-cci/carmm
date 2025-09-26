@@ -2,12 +2,12 @@
 def appending(surface, bulk, nlayers=None, sep=0.0, vac=10.0, output="apended.traj"):
     
     """
-    Small funciton to append layers of bulk underneath a relaxed surface.
+    Small function to append layers of bulk underneath a relaxed surface.
     Author: Hermione Beer, Oscar van Vuren
 
     Args:
-    	surface: file containing relaxed and optimised surface geometry without constraints (.traj).
-    	bulk: file containing relaxed and optimised bulk geometry without constraints (.traj). Must contain the number of layers of bulk required.
+    	surface: file containing relaxed and optimised surface geometry (.traj).
+    	bulk: file containing relaxed and optimised bulk geometry (.traj). Can contain the number of layers of bulk required or be constructed (nlayers).
         nlayers: number of layers of bulk to append. If None, bulk will be appended as is
     	sep: distance (Angstrom) between two layers. If sep = 0, then the surface will sit directly on bulk with the distance between them the same as the distance between the first upper 2 layers of bulk
     	vac: vacuum to be added in the z direction
