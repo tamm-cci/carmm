@@ -1,10 +1,14 @@
 
-def appending(surface, bulk, sep, output):
+def appending(surface, bulk, nlayers=None, sep=0.0, output="apended.traj"):
     
     """
+    Small funciton to append layers of bulk underneath a relaxed surface.
+    Author: Hermione Beer, Oscar van Vuren
+
     Args:
     	surface: file containing relaxed and optimised surface geometry without constraints (.traj).
     	bulk: file containing relaxed and optimised bulk geometry without constraints (.traj). Must contain the number of layers of bulk required.
+        nlayers: number of layers of bulk to append. If None, bulk will be appended as is
     	sep: distance (Angstrom) between two layers. If sep = 0, then the surface will sit directly on bulk with the distance between them the same as the distance between the first upper 2 layers of bulk
     	output: name of file that will be saved (.traj) of appended bulk and surface.
     Returns:
@@ -12,11 +16,13 @@ def appending(surface, bulk, sep, output):
     
     from ase.io import read, write
     import numpy as np
-    
+
     # Defining surface
     surface = read(surface)
     # Defining bulk
     bulk = read(bulk)
+    if nlayers is not None:
+        bulk *= np.array([1,1,nlayers])
     
     # Appending them
     # Getting maximum coords of bulk in z direction
