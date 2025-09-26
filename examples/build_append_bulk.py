@@ -13,7 +13,7 @@ def test_append_bulk():
     mgo = bulk("MgO", crystalstructure="rocksalt", a=4.212, cubic=True)
     slab=surface(mgo, (1,0,0),3, vacuum=5.0)
 
-    apnd = append_bulk(surface=slab, bulk=bulk, nlayers=3, vac=10.0, output=None)
+    apnd = append_bulk(input_surface=slab, input_bulk=mgo, nlayers=3, vac=10.0, output=None)
 
     apnd.write("atoms_test_append.traj")
     size=apnd.positions.size
@@ -21,7 +21,7 @@ def test_append_bulk():
     assert(size == 144)
     assert(shape == (48,3))
 
-    append_bulk(surface="data/mgo/mgo_slab.traj", bulk="data/mgo/mgo_bulk.traj", nlayers=None, vac=10.0, output="data/mgo/file_test_append.traj")
+    append_bulk(input_surface="data/mgo/mgo_slab.traj", input_bulk="data/mgo/mgo_bulk.traj", nlayers=None, vac=10.0, output="data/mgo/file_test_append.traj")
 
     test=read("data/mgo/file_test_append.traj")
     size=test.positions.size 

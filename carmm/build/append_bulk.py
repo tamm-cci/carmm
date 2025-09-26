@@ -1,5 +1,5 @@
 
-def append_bulk(surface, bulk, nlayers=None, vac=10.0, output="apended.traj"):
+def append_bulk(input_surface, input_bulk, nlayers=None, vac=10.0, output="apended.traj"):
     
     """
     Small function to append layers of bulk underneath a relaxed surface.
@@ -19,18 +19,20 @@ def append_bulk(surface, bulk, nlayers=None, vac=10.0, output="apended.traj"):
     import numpy as np
 
     # Defining surface
-    if type(surface) == str:
-        surface = read(surface)
+    if type(input_surface) == str:
+        surface = read(input_surface)
     else:
-        surface=surface
+        surface=input_surface
     # Defining bulk
-    if type(bulk) == str:
-        bulk = read(bulk)
+    if type(input_bulk) == str:
+        bulk = read(input_bulk)
     else:
-        bulk=bulk
+        bulk=input_bulk
 
     if nlayers is not None:
-        bulk *= np.array([1,1,nlayers])
+        layers_mult = np.array([1,1,nlayers])
+        print(layers_mult)
+        bulk = bulk * layers_mult
     
     # Appending them
     # Getting maximum coords of bulk in z direction
