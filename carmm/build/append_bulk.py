@@ -28,7 +28,7 @@ def append_bulk(surface, bulk, nlayers=None, vac=10.0, output="apended.traj"):
         bulk = read(bulk)
     else:
         bulk=bulk
-        
+
     if nlayers is not None:
         bulk *= np.array([1,1,nlayers])
     
@@ -40,8 +40,8 @@ def append_bulk(surface, bulk, nlayers=None, vac=10.0, output="apended.traj"):
     
     # Defining vertical distance between bulk and surf
     # finding interlayer separation in the bulk
-    separation = np.sort(np.unique(bulk.positions[:,2]))
-
+    zeds = np.sort(np.unique(bulk.positions[:,2]))
+    separation = zeds[1] - zeds[0]
     # Constructing shift using interlayer distance
     z_shift = bulk_max_z - surf_min_z + separation
 
