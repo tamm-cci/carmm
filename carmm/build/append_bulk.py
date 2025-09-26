@@ -1,5 +1,5 @@
 
-def appending(surface, bulk, nlayers=None, sep=0.0, output="apended.traj"):
+def appending(surface, bulk, nlayers=None, sep=0.0, vac=10.0, output="apended.traj"):
     
     """
     Small funciton to append layers of bulk underneath a relaxed surface.
@@ -10,7 +10,8 @@ def appending(surface, bulk, nlayers=None, sep=0.0, output="apended.traj"):
     	bulk: file containing relaxed and optimised bulk geometry without constraints (.traj). Must contain the number of layers of bulk required.
         nlayers: number of layers of bulk to append. If None, bulk will be appended as is
     	sep: distance (Angstrom) between two layers. If sep = 0, then the surface will sit directly on bulk with the distance between them the same as the distance between the first upper 2 layers of bulk
-    	output: name of file that will be saved (.traj) of appended bulk and surface.
+    	vac: vacuum to be added in the z direction
+        output: name of file that will be saved (.traj) of appended bulk and surface.
     Returns:
     """
     
@@ -38,10 +39,12 @@ def appending(surface, bulk, nlayers=None, sep=0.0, output="apended.traj"):
     
     # Resizing cell and centering it
     final_cell = appended_material.get_cell()
-    final_cell[2, 2] = np.max(appended_material.positions[:, 2]) - np.min(appended_material.positions[:, 2]) + 10.0
+    final_cell[2, 2] = np.max(appended_material.positions[:, 2]) - np.min(appended_material.positions[:, 2]) + vac
     appended_material.set_cell(final_cell)
     appended_material.center(axis=2)
     
     # Saving it
-    write(output, appended_material)
-    write(output, appended_material, append=True)
+    if output is not None:
+        appended_material.write(output)
+
+    return appended_material
