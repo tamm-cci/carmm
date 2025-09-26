@@ -16,13 +16,17 @@ def test_append_bulk():
     apnd = append_bulk(surface=slab, bulk=bulk, nlayers=3, vac=10.0, output=None)
 
     apnd.write("atoms_test_append.traj")
-    assert(apnd.positions.size == 144)
-    assert(apnd.positions.shape == (48,3))
+    size=apnd.positions.size
+    shape=apnd.positions.shape
+    assert(size == 144)
+    assert(shape == (48,3))
 
     append_bulk(surface="data/mgo/mgo_slab.traj", bulk="data/mgo/mgo_bulk.traj", nlayers=None, vac=10.0, output="data/mgo/file_test_append.traj")
 
     test=read("data/mgo/file_test_append.traj")
-    assert(test.positions.size == 96)
-    assert(test.positions.shape == (32,3))
+    size=test.positions.size 
+    shape=test.positions.shape
+    assert(size == 96)
+    assert(shape == (32,3))
 
 test_append_bulk()
