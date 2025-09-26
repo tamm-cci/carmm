@@ -1,5 +1,5 @@
 
-def appending(surface, bulk, nlayers=None, sep=0.0, vac=10.0, output="apended.traj"):
+def append_bulk(surface, bulk, nlayers=None, sep=0.0, vac=10.0, output="apended.traj"):
     
     """
     Small function to append layers of bulk underneath a relaxed surface.
