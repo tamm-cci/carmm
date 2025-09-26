@@ -1,5 +1,5 @@
 
-def append_bulk(surface, bulk, nlayers=None, sep=0.0, vac=10.0, output="apended.traj"):
+def append_bulk(surface, bulk, nlayers=None, vac=10.0, output="apended.traj"):
     
     """
     Small function to append layers of bulk underneath a relaxed surface.
@@ -32,8 +32,12 @@ def append_bulk(surface, bulk, nlayers=None, sep=0.0, vac=10.0, output="apended.
     surf_min_z = np.min(surface.positions[:, 2])
     
     # Defining vertical distance between bulk and surf
-    separation = sep
+    # finding interlayer separation in the bulk
+    separation = np.sort(np.unique(bulk.positions[:,2]))
+
+    # Constructing shift using interlayer distance
     z_shift = bulk_max_z - surf_min_z + separation
+
     surface.positions[:, 2] += z_shift # Apply transition to surf
     appended_material = bulk + surface # Combining bulk and surf into new object
     
