@@ -6,8 +6,8 @@ def append_bulk(surface, bulk, nlayers=None, vac=10.0, output="apended.traj"):
     Author: Hermione Beer, Oscar van Vuren
 
     Args:
-    	surface: file containing relaxed and optimised surface geometry (.traj).
-    	bulk: file containing relaxed and optimised bulk geometry (.traj). Can contain the number of layers of bulk required or be constructed (nlayers).
+    	surface: file or atoms containing relaxed and optimised surface geometry (.traj).
+    	bulk: file or atoms containing relaxed and optimised bulk geometry (.traj). Can contain the number of layers of bulk required or be constructed (nlayers).
         nlayers: number of layers of bulk to append. If None, bulk will be appended as is
     	sep: distance (Angstrom) between two layers. If sep = 0, then the surface will sit directly on bulk with the distance between them the same as the distance between the first upper 2 layers of bulk
     	vac: vacuum to be added in the z direction
@@ -19,9 +19,16 @@ def append_bulk(surface, bulk, nlayers=None, vac=10.0, output="apended.traj"):
     import numpy as np
 
     # Defining surface
-    surface = read(surface)
+    if type(surface) == str:
+        surface = read(surface)
+    else:
+        surface=surface
     # Defining bulk
-    bulk = read(bulk)
+    if type(bulk) == str:
+        bulk = read(bulk)
+    else:
+        bulk=bulk
+        
     if nlayers is not None:
         bulk *= np.array([1,1,nlayers])
     
