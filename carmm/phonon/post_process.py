@@ -40,17 +40,20 @@ def get_band_conf(atoms):
             f'BAND_POINTS = 101\n')
     f.close()
 
+
 def get_thermal_conf():
     f = open('thermal.conf', 'w')
     f.write(f'TPROP =.TRUE.\n'
             f'MESH = 16 16 16\n')
     f.close()
 
+
 def generate_phonon_data():
     import os
     os.system("phonopy -f disp-?/aims.out")
     os.system("phonopy -p -s band.conf")
     os.system("phonopy -p -s thermal.conf")
+
 
 def phonon_data_to_csv(band_data=False, thermal_data=True, band_file='band.yaml', thermal_file='thermal_properties.yaml'):
     import yaml
@@ -74,8 +77,8 @@ def phonon_data_to_csv(band_data=False, thermal_data=True, band_file='band.yaml'
                 stream.close()
                 print('Thermal data written to file thermal_data.csv')
         else:
-            raise Exception('The file \'thermal_properties.yaml\' not found. Make sure you are providiing the correct file name to the '
-                  'thermal_file parameter in the function')
+            raise Exception('The file \'thermal_properties.yaml\' not found. Make sure you are providing the correct '
+                            'file name to the thermal_file parameter in the function')
     if band_data:
         if os.path.exists(band_file):
             csv_file = f'band_data.csv'
@@ -92,5 +95,5 @@ def phonon_data_to_csv(band_data=False, thermal_data=True, band_file='band.yaml'
                 stream.close()
                 print('Phonon band structure data written to file band_data.csv')
         else:
-            raise Exception('The file \'band.yaml\' not found. Make sure you are providiing the correct file name to the '
-                  'band_file parameter in the function')
+            raise Exception('The file \'band.yaml\' not found. Make sure you are providing the correct file name to '
+                  'the band_file parameter in the function')
