@@ -18,8 +18,6 @@ def get_band_conf(atoms):
                 cor2 = lat1.special_points[sp][1]
                 cor3 = lat1.special_points[sp][2]
                 band.append(f'{cor1} {cor2} {cor3}')
-        # elif sp == ',':
-        #     band[-1] = band[-1] + ','
 
     for i in band_label:
         if i == ',':
@@ -41,10 +39,8 @@ def get_band_conf(atoms):
             f'BAND_LABELS = {band_label_final}\n'
             f'BAND_POINTS = 101\n')
     f.close()
-    # f.write(f'TPROP =.TRUE.\n'
-    #         f'MESH = 16 16 16\n')
 
-def get_thermal_conf(atoms):
+def get_thermal_conf():
     f = open('thermal.conf', 'w')
     f.write(f'TPROP =.TRUE.\n'
             f'MESH = 16 16 16\n')
