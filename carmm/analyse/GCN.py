@@ -50,6 +50,10 @@ def fnn_set(fnnLists):
 def general_coord_number(lattice='fcc', facet=(1,1,1), site='ontop'):
 
     """
+    GCN calculator.
+    See: 
+    Calle-Vallejo, F. (2023). Advanced Science, 10(20), 2207644. https://doi.org/10.1002/ADVS.202207644
+    Zhao, Z., et al. (2016). Journal of Physical Chemistry C, 120(49), 28125–28130. https://doi.org/10.1021/ACS.JPCC.6B10155/
     :param atoms: Surface model (should be large enough, e.g.(3*3*3))
     :param a: lattice parameter
     :param lattice: crystal structure
