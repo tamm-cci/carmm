@@ -88,9 +88,9 @@ def vib_angle(traj, vib_atom_index, ref_atom_index):
     return angle_deg
 
 
-def group_modes(traj, atom_pairs):
+def characterise_vib(traj, atom_pairs):
     '''
-    Group modes into a total description of the vibration: (a)symmetric stretching, or bending
+    Characterise the vibration as (a)symmetric stretching, or bending
 
     Parameters:
         traj: (list of atoms objects) List of atoms objects from ASE vibration .traj file
