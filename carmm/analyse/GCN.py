@@ -88,7 +88,7 @@ def general_coord_number(lattice='fcc', facet=(1,1,1), site='ontop'):
         siteIndices = [lastIndex+5*size, lastIndex-1+5*size]
     
     # Shift the indices to the centre of the surface to bulk interior
-    innersiteIndices = [siteIndices[0]-5*toplayerSize]
+    innersiteIndices = [siteIndices[0]-6*toplayerSize]
     cn, fnn = coord_number(slab, a=3.6, lattice=lattice, siteIndices=innersiteIndices)
     cn_max = len(fnn_set(fnn))
     print('CN-max ', cn_max)
