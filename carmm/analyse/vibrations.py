@@ -88,13 +88,14 @@ def vib_angle(traj, vib_atom_index, ref_atom_index):
     return angle_deg
 
 
-def characterise_vib(traj, atom_pairs):
+def characterise_vib(traj, atom_pairs, bending_tol=10):
     '''
     Characterise the vibration as (a)symmetric stretching, or bending
 
     Parameters:
         traj: (list of atoms objects) List of atoms objects from ASE vibration .traj file
         atom_pairs: (list of lists) list of pairs of indices of atoms forming the whole vibration
+        bending_tol: (float) angle (in degrees) above which vibrations are classified as bending not stretching
 
     Returns:
         Description of vibration, Full info of vibrational modes
@@ -107,7 +108,7 @@ def characterise_vib(traj, atom_pairs):
     for pair in atom_pairs:
         pair_info = [pair]
         angle = vib_angle(traj, pair[0], pair[1])
-        if angle > 10:
+        if angle > bending_tol:
             pair_info.append('Bend')
             pair_info.append(1)
         else:
