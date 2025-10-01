@@ -79,17 +79,20 @@ def general_coord_number(lattice='fcc', facet=(1,1,1), site='ontop'):
 
     slab = slab.repeat((4,4,1))
     
+    # FCC cn_max = 12
+    
     if site == 'ontop':
-        cn_max = 12
         siteIndices = [lastIndex+5*size,]
     elif site == 'bridge':
         # Shift the indices to the centre of the surface
         siteIndices = [lastIndex+5*size, lastIndex-1+5*size]
-        # Shift the indices to the centre of the surface to bulk interior
-        innersiteIndices = [index-5*toplayerSize for index in siteIndices]
-        cn, fnn = coord_number(slab, a=3.6, lattice=lattice, siteIndices=innersiteIndices)
-        cn_max = len(fnn_set(fnn))
     
+    # Shift the indices to the centre of the surface to bulk interior
+    innersiteIndices = [siteIndices[0]-5*toplayerSize]
+    cn, fnn = coord_number(slab, a=3.6, lattice=lattice, siteIndices=innersiteIndices)
+    cn_max = len(fnn_set(fnn))
+    print('CN-max ', cn_max)
+
     cn, fnn = coord_number(slab, a=3.6, lattice=lattice, siteIndices=siteIndices)
     fnn_site = fnn_set(fnn)  # extracting the fnn of the site
     
