@@ -126,6 +126,6 @@ def general_coord_number(lattice='fcc', facet=(1,1,1), site='ontop'):
         sum_fnn_cn += n   # calculating cn(j)
 
     gcn = sum_fnn_cn / cn_max   # dividing summation by cn_max (can do as cn_max is a constant)
-    view(slab)
+    # view(slab)
     return gcn
 
