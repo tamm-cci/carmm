@@ -3,6 +3,11 @@
 
 def bulk_identifier(slab, cutoff_distance=10.0):
     """
+    ---
+    08/01/2024
+    testing ASE version 3.24.0
+    ---
+
     Slab models can be generated using various libraries like ASE, pymatgen, atomman, etc. However, it becomes important
     to check how these slab models are generated within various code bases.
 
@@ -26,17 +31,22 @@ def bulk_identifier(slab, cutoff_distance=10.0):
     properties." Physical Review B 103.19 (2021): 195426.
 
     How this functionality works:
+
     1. the difference between the x,y and z coordinates of an atom and its corresponding periodic image will be a linear
     combination of the cell vectors a,b and c.
+
     2. This idea is extended here in case of a slab model where the linear combination check
     is considered only w.r.t to the a and b vectors
 
     Args:
+
     - slab: ASE Atoms object representing the slab structure
-    - cutoff_distance: Cutoff distance for identifying neighboring atoms (default is 10.0). This will be used to
+
+    - cutoff_distance: Cutoff distance for identifying neighboring atoms (default is 10.0).\n This will be used to
      perform further checks on atoms which satisfy the condition of linear combination.
 
     Returns:
+
     - ASE Atoms object representing the new bulk structure
     """
     from ase.build.tools import sort
