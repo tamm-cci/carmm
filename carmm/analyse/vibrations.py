@@ -77,8 +77,7 @@ def vib_disps(traj, tolerance=0.05):
 
 def vib_angle(traj, vib_atom_index, ref_atom_index):
     # Only single atom vibrations supported
-    traj_obj = read(traj)
-    max_positions, original_positions = frame_finder(traj_obj)
+    max_positions, original_positions = frame_finder(traj)
     v1 = max_positions[1].positions[vib_atom_index] - max_positions[1].positions[ref_atom_index]
     v1 = v1/np.linalg.norm(v1)
     v2 = max_positions[0].positions[vib_atom_index] - max_positions[0].positions[ref_atom_index]
