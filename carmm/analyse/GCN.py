@@ -9,7 +9,6 @@ def coord_number(atoms, a=3.6, lattice='fcc', siteIndices=None):
         bond = round(a / 2 ** 0.5, 3)
     elif lattice == 'bcc':
         bond = round(a * (3 ** 0.5) / 2, 3)
-    # Add an if statement to make this function also works for bcc
 
 
     for i in siteIndices:
@@ -61,23 +60,38 @@ def general_coord_number(lattice='fcc', facet=(1,1,1), site='ontop'):
     :param site: 'ontop', 'bridge'
     :return: gcn. Generalized coordination number
     """
-    sum_fnn_cn = 0 # The sum of CN of fnns
-
     from ase.build import surface, bulk
+    from ase.visualize import view
+
+    sum_fnn_cn = 0 # The sum of CN of fnns
+    a =3.6
+    
+    if lattice == 'fcc':
+        bond = round(a / 2 ** 0.5, 3)
+    elif lattice == 'bcc':
+        bond = round(a * (3 ** 0.5) / 2, 3)
+    
     if lattice not in ['fcc', 'bcc']:
         print('Only support fcc and bcc for now')
         return 'gcn failed'
     
 
-    copper = bulk('Cu', lattice, a=3.6, cubic=True)
+    copper = bulk('Cu', lattice, a=a, cubic=True)
     slab = surface(copper, facet, layers=20, vacuum=20)
-    
-    lastIndex = slab[-1].index
+     
     size = len(slab)
-    toplayerIndices = [atom for atom in slab if atom.tag == 1]
+    lastIndex = 0 # Surface atom at the top right corner
+    toplayerIndices = [atom.index for atom in slab if atom.tag == 1]
     toplayerSize = len(toplayerIndices)
+    
+    x=0
+    y=0
+    for index in toplayerIndices:
+        if slab[index].x > x and slab[index].y > y:
+            x = slab[index].x
+            y = slab[index].y
+            lastIndex = index
 
-    slab = slab.repeat((4,4,1))
     
     # FCC cn_max = 12
     
@@ -85,24 +99,33 @@ def general_coord_number(lattice='fcc', facet=(1,1,1), site='ontop'):
         siteIndices = [lastIndex+5*size,]
     elif site == 'bridge':
         # Shift the indices to the centre of the surface
-        siteIndices = [lastIndex+5*size, lastIndex-1+5*size]
-    
+        topfnn = [atom.index for atom in slab 
+                  if atom.tag == 1 and 
+                  slab.get_distance(atom.index, lastIndex) <= bond+0.001 
+                  and slab.get_distance(atom.index, lastIndex) >= bond-0.001]
+        
+        siteIndices = [lastIndex+5*size, topfnn[0]+5*size]
+
+    slab = slab.repeat((4,4,1))
+
+    print('last index ', lastIndex, 'site indices', siteIndices)
+
     # Shift the indices to the centre of the surface to bulk interior
-    innersiteIndices = [siteIndices[0]-6*toplayerSize]
-    cn, fnn = coord_number(slab, a=3.6, lattice=lattice, siteIndices=innersiteIndices)
+    innersiteIndices = [siteIndices[0]-9*toplayerSize]
+    cn, fnn = coord_number(slab, a=a, lattice=lattice, siteIndices=innersiteIndices)
     cn_max = len(fnn_set(fnn))
     print('CN-max ', cn_max)
 
-    cn, fnn = coord_number(slab, a=3.6, lattice=lattice, siteIndices=siteIndices)
+    cn, fnn = coord_number(slab, a=a, lattice=lattice, siteIndices=siteIndices)
     fnn_site = fnn_set(fnn)  # extracting the fnn of the site
     
     #  the CN of fnns
-    cn_fnn_site, fnn_f = coord_number(slab, a=3.6, lattice=lattice, siteIndices=fnn_site)
+    cn_fnn_site, fnn_f = coord_number(slab, a=a, lattice=lattice, siteIndices=fnn_site)
 
     for n in cn_fnn_site:
         sum_fnn_cn += n   # calculating cn(j)
 
     gcn = sum_fnn_cn / cn_max   # dividing summation by cn_max (can do as cn_max is a constant)
-
+    view(slab)
     return gcn
 
