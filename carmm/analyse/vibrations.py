@@ -53,7 +53,7 @@ class plot_vibration_data:
         plt.title(self.title)
         plt.show()
 
-def vib_disps(traj, tolerance):
+def vib_disps(traj, tolerance=0.05):
     '''
     Find atoms that displace during the vibration
 
