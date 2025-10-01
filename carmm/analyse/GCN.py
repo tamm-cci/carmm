@@ -22,7 +22,7 @@ def coord_number(atoms, a=3.6, lattice='fcc', siteIndices=None):
             # between atom i and itself
             if i == j:
                 continue
-            elif abs(atoms[i].tag-atom_j.tag) > 4:
+            elif abs(atoms[i].z-atom_j.z) > 4:
                 continue
             # Check if atom i and atom j are first nearst neighbours
             dist = atoms.get_distance(i, j, mic=True)
@@ -62,6 +62,7 @@ def general_coord_number(lattice='fcc', facet=(1,1,1), site='ontop'):
     """
     from ase.build import surface, bulk
     from ase.visualize import view
+    import numpy as np
 
     sum_fnn_cn = 0 # The sum of CN of fnns
     a =3.6
@@ -80,8 +81,10 @@ def general_coord_number(lattice='fcc', facet=(1,1,1), site='ontop'):
     slab = surface(copper, facet, layers=20, vacuum=20)
      
     size = len(slab)
+    maxZ = np.max([atom.z for atom in slab])
+
     lastIndex = 0 # Surface atom at the top right corner
-    toplayerIndices = [atom.index for atom in slab if atom.tag == 1]
+    toplayerIndices = [atom.index for atom in slab if atom.z == maxZ]
     toplayerSize = len(toplayerIndices)
     
     x=0
@@ -100,7 +103,7 @@ def general_coord_number(lattice='fcc', facet=(1,1,1), site='ontop'):
     elif site == 'bridge':
         # Shift the indices to the centre of the surface
         topfnn = [atom.index for atom in slab 
-                  if atom.tag == 1 and 
+                  if atom.z == maxZ and 
                   slab.get_distance(atom.index, lastIndex) <= bond+0.001 
                   and slab.get_distance(atom.index, lastIndex) >= bond-0.001]
         
