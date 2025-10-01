@@ -62,11 +62,4 @@ def general_coord_number(atoms, a, lattice, site):
 
     return gcn
 
-
-from ase.build import bulk, fcc111, fcc110, fcc100   # for fcc110, the gcn varies with size
-
-Cu = bulk('Cu', crystalstructure='fcc', a=3.615, cubic=True)
-Cu = Cu.repeat((2, 2, 2))
-Cuslab = fcc110('Cu', a=3.615, size=(5, 5, 5), vacuum=10, periodic=True)
-gcn = general_coord_number(Cuslab, a=3.615, lattice='fcc', site=Cuslab[-1].index)
 print(gcn)
