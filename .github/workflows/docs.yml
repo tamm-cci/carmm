@@ -8,15 +8,18 @@ on:
 jobs:
   build_docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@main
 
     - name: Install Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@main
       with:
-        python-version: '3.9'
+        python-version: '3.10'
 
     - name: Install Sphinx and necessary dependencies
       run: |
@@ -46,7 +49,7 @@ jobs:
     # Publish built docs to gh-pages branch.
     - name: Commit documentation changes
       run: |
-        git clone https://github.com/logsdail/carmm.git --branch gh-pages --single-branch gh-pages
+        git clone https://github.com/tamm-cci/carmm.git --branch gh-pages --single-branch gh-pages
         cp -r docs/* gh-pages/docs
         cd gh-pages
         git config --local user.email "action@github.com"
