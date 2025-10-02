@@ -63,7 +63,7 @@ def get_band_conf(atoms):
     f.close()
 
 
-def get_thermal_conf():
+def get_thermal_conf(min_temp=0, max_temp=1000, step=10):
     """
     Generate the thermal properties configuration (thernal.conf file)
     The thermal.conf file is necessary to generate a thermal properties data once the force set are collected and the
@@ -71,7 +71,16 @@ def get_thermal_conf():
 
     Parameters
     ----------
-    None
+    min_temp: int, optional
+        The minimum temperature (in K) for calculating the thermal properties.
+        Default value is O K
+    max_temp: int, optional
+        The maximum temperature (in K) for calculating the thermal properties.
+        Default value is 1000 K
+    step: int, optional
+        Temperature steps for calculating the thermal properties.
+        Default value is 10. For example, the properties will be calculated at 0, 10, 20, ... so on
+
 
     Returns
     -------
@@ -83,14 +92,16 @@ def get_thermal_conf():
     - This function serves as a helper to prepare configuration file to generate the thermal property data like
     energy, entropy, Helmholtz free energy and heat capacity.
     - NOTE: currently the temperature range is from 0 to 1000 K. For a majority of systems, the range is sufficient to
-    understand the thermal properities. Future development may allow for custom range.
+    understand the thermal properties. Future development may allow for custom range.
 
     """
     f = open('thermal.conf', 'w')
     f.write(f'TPROP =.TRUE.\n'
+            f'TMIN ={min_temp}\n'
+            f'TMAX ={max_temp}\n'
+            f'TSTEP ={step}\n'
             f'MESH = 16 16 16\n')
     f.close()
-
 
 def generate_phonon_data(bandstructure=True, thermal_properties=True):
     """
@@ -118,13 +129,13 @@ def generate_phonon_data(bandstructure=True, thermal_properties=True):
     band.pdf -- phonon band structure
     band.yaml -- phonon band structure data as yaml file. use the phonon_data_to_csv to obtain the data as a csv file
     thermal.pdf -- thermal properties plotted as a function of temperature
-    thermal_properites.yaml - thermal properties data as yaml file. use the phonon_data_to_csv to obtain the data as a
+    thermal_properties.yaml - thermal properties data as yaml file. use the phonon_data_to_csv to obtain the data as a
     csv file
 
 
     Notes
     -----
-    To obtain the thermal properities, it is necessary to keep the paramter bandstructure=True, because thermal
+    To obtain the thermal properties, it is necessary to keep the parameter bandstructure=True, because thermal
     properties are derived from phonon density of states (DOS). In that case, if thermal_properties=True and bandstructure=False,
     the code will run the bandstructure command automatically to avoid any errors.
     """
