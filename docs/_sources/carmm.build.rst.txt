@@ -36,6 +36,14 @@ carmm.build.alloy module
    :undoc-members:
    :show-inheritance:
 
+carmm.build.append\_bulk module
+-------------------------------
+
+.. automodule:: carmm.build.append_bulk
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 carmm.build.cutout module
 -------------------------
 

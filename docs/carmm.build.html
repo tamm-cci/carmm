@@ -444,6 +444,32 @@ The desired filename to print the structure to (include desired file extension)<
 <section id="carmm-build-alloy-module">
 <h2>carmm.build.alloy module<a class="headerlink" href="#carmm-build-alloy-module" title="Link to this heading">¶</a></h2>
 </section>
+<section id="module-carmm.build.append_bulk">
+<span id="carmm-build-append-bulk-module"></span><h2>carmm.build.append_bulk module<a class="headerlink" href="#module-carmm.build.append_bulk" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="carmm.build.append_bulk.append_bulk">
+<span class="sig-prename descclassname"><span class="pre">carmm.build.append_bulk.</span></span><span class="sig-name descname"><span class="pre">append_bulk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_bulk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlayers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'apended.traj'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#carmm.build.append_bulk.append_bulk" title="Link to this definition">¶</a></dt>
+<dd><p>Small function to append layers of bulk underneath a relaxed surface.
+Allows for the construction of very large slab models for cutting QM/MM clusters
+without having to relax such a large model.
+Author: Hermione Beer, Oscar van Vuren</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>surface</strong> – file or atoms containing relaxed and optimised surface geometry (.traj).</p></li>
+<li><p><strong>bulk</strong> – file or atoms containing relaxed and optimised bulk geometry (.traj). Can contain the number of layers of bulk required or be constructed (nlayers).</p></li>
+<li><p><strong>NOTE</strong> – THE REPEAT UNIT OF BULK IN A SLAB MAY NOT BE THE BULK UNIT CELL. ENSURE USE OF CORRECT GEOMETRY FOR BULK</p></li>
+<li><p><strong>nlayers</strong> – number of layers of bulk to append. If None, bulk will be appended as is</p></li>
+<li><p><strong>sep</strong> – distance (Angstrom) between two layers. If sep = 0, then the surface will sit directly on bulk with the distance between them the same as the distance between the first upper 2 layers of bulk</p></li>
+<li><p><strong>vac</strong> – vacuum to be added in the z direction</p></li>
+<li><p><strong>output</strong> – name of file that will be saved (.traj) of appended bulk and surface.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
+</section>
 <section id="module-carmm.build.cutout">
 <span id="carmm-build-cutout-module"></span><h2>carmm.build.cutout module<a class="headerlink" href="#module-carmm.build.cutout" title="Link to this heading">¶</a></h2>
 <p>A collection of scripts that can generate and manipulate Chemshell fragment and cluster objects. These can be created
