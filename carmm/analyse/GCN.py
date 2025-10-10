@@ -1,4 +1,5 @@
-def coord_number(atoms, a=3.6, lattice='fcc', siteIndices=None):
+def coord_number(atoms, lattice='fcc', siteIndices=None):
+    a=3.6
     # The list that stores coordination number for each atom
     cn_list = []
     # The list that stores the indices of first nearst neighbours for each atom
@@ -53,10 +54,9 @@ def general_coord_number(lattice='fcc', facet=(1,1,1), site='ontop'):
     See: 
     Calle-Vallejo, F. (2023). Advanced Science, 10(20), 2207644. https://doi.org/10.1002/ADVS.202207644
     Zhao, Z., et al. (2016). Journal of Physical Chemistry C, 120(49), 28125–28130. https://doi.org/10.1021/ACS.JPCC.6B10155/
-    :param atoms: Surface model (should be large enough, e.g.(3*3*3))
-    :param a: lattice parameter
+    
     :param lattice: crystal structure
-    :param facet: tuple,e.g. (1,1,1)
+    :param facet: tuple, e.g. (1,1,1)
     :param site: 'ontop', 'bridge'
     :return: gcn. Generalized coordination number
     """
@@ -115,15 +115,15 @@ def general_coord_number(lattice='fcc', facet=(1,1,1), site='ontop'):
 
     # Shift the indices to the centre of the surface to bulk interior
     innersiteIndices = [siteIndices[0]-9*toplayerSize]
-    cn, fnn = coord_number(slab, a=a, lattice=lattice, siteIndices=innersiteIndices)
+    cn, fnn = coord_number(slab, lattice=lattice, siteIndices=innersiteIndices)
     cn_max = len(fnn_set(fnn))
     print('CN-max ', cn_max)
 
-    cn, fnn = coord_number(slab, a=a, lattice=lattice, siteIndices=siteIndices)
+    cn, fnn = coord_number(slab, lattice=lattice, siteIndices=siteIndices)
     fnn_site = fnn_set(fnn)  # extracting the fnn of the site
     
     #  the CN of fnns
-    cn_fnn_site, fnn_f = coord_number(slab, a=a, lattice=lattice, siteIndices=fnn_site)
+    cn_fnn_site, fnn_f = coord_number(slab, lattice=lattice, siteIndices=fnn_site)
 
     for n in cn_fnn_site:
         sum_fnn_cn += n   # calculating cn(j)
