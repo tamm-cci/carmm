@@ -18,7 +18,8 @@ def test_analyse_counterpoise():
     # This is an example script for using counterpoise_calc for counterpoise (CP) correction. Please note the species
     # files in data/CO_BSSE are fake ones and default species settings are also deleted from aims.out.
 
-    # Required for testing - disable this line in applied calculations
+    # Required for testing - disable these two lines in applied calculations
+    import os
     os.environ['VERSION'] = "$VERSION"    
 
     set_aims_command(hpc='hawk', basis_set='light', defaults=2020)
