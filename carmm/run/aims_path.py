@@ -63,6 +63,9 @@ def set_aims_command(hpc='hawk', basis_set='light', defaults=2010, nodes_per_ins
         "custom": custom_root_dir
     }
 
+    assert "VERSION" in os.environ, \
+            "The executable VERSION must be defined as an environment variable before running."
+
     executable_d = {"compiled": "bin/aims."+os.environ["VERSION"]+".scalapack.mpi.x",
                     "apptainer": "apptainer exec " + fhi_aims_directory["aws"] + "mkl_aims_2.sif bash " + \
                                  fhi_aims_directory["aws"] + "sing_fhiaims_script.sh $@"
