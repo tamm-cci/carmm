@@ -4,6 +4,7 @@ def test_surface_area():
     from carmm.analyse.surface_area import surface_area
     from ase.build import fcc111
     import math
+    import numpy as np
 
     slab =  fcc111('Pd', (5, 5, 5), vacuum=20.0)
     print(slab)
