@@ -10,7 +10,7 @@ def test_surface_area():
     surface_slab=surface_area(slab)
     print(surface_slab)
     # Assertion test
-    assert(surface_slab == 163.8097876575813)
+    assert(np.isclose(surface_slab, 163.8097876575813))
     
 test_surface_area()
 
