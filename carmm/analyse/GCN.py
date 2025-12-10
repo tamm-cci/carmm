@@ -1,5 +1,7 @@
-def coord_number(atoms, lattice='fcc', siteIndices=None):
-    a=3.6
+def coord_number(atoms, a=3.6, lattice='fcc', siteIndices=None):
+    '''
+    Coordination number calculator for clean-cut slab from ideal bulk structure
+    '''
     # The list that stores coordination number for each atom
     cn_list = []
     # The list that stores the indices of first nearst neighbours for each atom
@@ -47,10 +49,10 @@ def fnn_set(fnnLists):
         allfnn += fnn
     return set(allfnn)
     
-def general_coord_number(lattice='fcc', facet=(1,1,1), site='ontop'):
+def general_coord_number(lattice='fcc', a=3.6, facet=(1,1,1), site='ontop'):
 
     """
-    GCN calculator.
+    GCN calculator. Only works with perfect metal slab from bulk structure for now. Accepting abitrary atoms object is not implemented for now.
     See: 
     Calle-Vallejo, F. (2023). Advanced Science, 10(20), 2207644. https://doi.org/10.1002/ADVS.202207644
     Zhao, Z., et al. (2016). Journal of Physical Chemistry C, 120(49), 28125–28130. https://doi.org/10.1021/ACS.JPCC.6B10155/
@@ -64,8 +66,7 @@ def general_coord_number(lattice='fcc', facet=(1,1,1), site='ontop'):
     from ase.visualize import view
     import numpy as np
 
-    sum_fnn_cn = 0 # The sum of CN of fnns
-    a =3.6
+    sum_fnn_cn = 0 # The sum of CN of fnn
     
     if lattice == 'fcc':
         bond = round(a / 2 ** 0.5, 3)
