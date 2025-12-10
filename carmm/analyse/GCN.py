@@ -49,7 +49,7 @@ def fnn_set(fnnLists):
         allfnn += fnn
     return set(allfnn)
     
-def general_coord_number(lattice='fcc', a=3.6, facet=(1,1,1), site='ontop'):
+def general_coord_number(lattice='fcc', element='Cu', a=3.6, facet=(1,1,1), site='ontop'):
 
     """
     GCN calculator. Only works with perfect metal slab from bulk structure for now. Accepting abitrary atoms object is not implemented for now.
@@ -78,8 +78,8 @@ def general_coord_number(lattice='fcc', a=3.6, facet=(1,1,1), site='ontop'):
         return 'gcn failed'
     
 
-    copper = bulk('Cu', lattice, a=a, cubic=True)
-    slab = surface(copper, facet, layers=20, vacuum=20)
+    metalbulk = bulk(element, lattice, a=a, cubic=True)
+    slab = surface(metalbulk, facet, layers=20, vacuum=20)
      
     size = len(slab)
     maxZ = np.max([atom.z for atom in slab])
