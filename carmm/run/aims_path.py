@@ -43,6 +43,7 @@ def set_aims_command(hpc='hawk', basis_set='light', defaults=2010, nodes_per_ins
         "hawk": "time srun",
         "hawk-amd": "time srun",
         "isambard": "time aprun",
+        "isambard3": "time srun",
         "archer2": "srun --cpu-bind=cores --distribution=block:block --hint=nomultithread",
         "young": "gerun",
         "aws": "time srun --mpi=pmi2 --hint=nomultithread --distribution=block:block",
@@ -55,13 +56,17 @@ def set_aims_command(hpc='hawk', basis_set='light', defaults=2010, nodes_per_ins
         "hawk": "/apps/local/projects/scw1057/software/fhi-aims/",
         "hawk-amd": "/apps/local/projects/scw1057/software/fhi-aims/",
         "isambard": "/home/ca-alogsdail/fhi-aims-gnu/",
+        "isambard3": "/projects/c5b/software/fhi-aims/release/250822/",
         "archer2": "/work/e05/e05-files-log/shared/software/fhi-aims/",
         "young": "/home/mmm0170/Software/fhi-aims/",
         "aws": "/shared/logsdail_group/sing/",
         "custom": custom_root_dir
     }
 
-    executable_d = {"compiled": "bin/aims.$VERSION.scalapack.mpi.x",
+    assert "VERSION" in os.environ, \
+            "The executable VERSION must be defined as an environment variable before running."
+
+    executable_d = {"compiled": "bin/aims."+os.environ["VERSION"]+".scalapack.mpi.x",
                     "apptainer": "apptainer exec " + fhi_aims_directory["aws"] + "mkl_aims_2.sif bash " + \
                                  fhi_aims_directory["aws"] + "sing_fhiaims_script.sh $@"
                     }
@@ -108,6 +113,7 @@ def _get_cpu_command(hpc, nodes_per_instance=None):
         "hawk": { "cpus_per_node": 40, "cpu_command": f"--nodes=$SLURM_NNODES --ntasks=$SLURM_NTASKS -d mpirun", },
         "hawk-amd": { "cpus_per_node": 64, "cpu_command": f"--nodes=$SLURM_NNODES --ntasks=$SLURM_NTASKS -d mpirun", },
         "isambard": { "cpus_per_node": 64, "cpu_command": f"-n $NPROCS", },
+        "isambard3": { "cpus_per_node": 144, "cpu_command": "", },
         "young": { "cpus_per_node": 64, "cpu_command": "", },
         "archer2": { "cpus_per_node": 128, "cpu_command": "", },
         "aws": { "cpus_per_node": 72, "cpu_command": "",  }
