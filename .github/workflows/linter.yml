@@ -1,8 +1,8 @@
 # This is a basic workflow
 name: linter
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
+# Controls when the action will run.
+# Triggers the workflow on push or pull request events but only for the master branch
 on:
   push:
     # Only invoke for push to main.
@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             python-version: '3.7'
           - os: ubuntu-24.04
             python-version: '3.8'
@@ -34,11 +34,11 @@ jobs:
     steps:
     
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@main
     
     # Ensure we are running Python v3.x
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@main
       with:
         python-version: ${{ matrix.python-version }}
 

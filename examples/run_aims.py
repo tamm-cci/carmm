@@ -10,24 +10,29 @@ def test_run_aims():
     import os
 
     expected_paths = {
-        'hawk': 'time srun --nodes=$SLURM_NNODES --ntasks=$SLURM_NTASKS -d mpirun /apps/local/projects/scw1057/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x',
-        'hawk-amd': 'time srun --nodes=$SLURM_NNODES --ntasks=$SLURM_NTASKS -d mpirun /apps/local/projects/scw1057/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x',
-        'isambard': 'time aprun -n $NPROCS /home/ca-alogsdail/fhi-aims-gnu/bin/aims.$VERSION.scalapack.mpi.x',
-        'archer2': 'srun --cpu-bind=cores --distribution=block:block --hint=nomultithread  /work/e05/e05-files-log/shared/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x',
-        'young': 'gerun  /home/mmm0170/Software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x',
-        'aws': 'time srun --mpi=pmi2 --hint=nomultithread --distribution=block:block  apptainer exec /shared/logsdail_group/sing/mkl_aims_2.sif bash /shared/logsdail_group/sing/sing_fhiaims_script.sh $@'
+        'hawk':       'time srun --nodes=$SLURM_NNODES --ntasks=$SLURM_NTASKS -d mpirun /apps/local/projects/scw1057/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x',
+        'hawk-amd':   'time srun --nodes=$SLURM_NNODES --ntasks=$SLURM_NTASKS -d mpirun /apps/local/projects/scw1057/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x',
+        'isambard':   'time aprun -n $NPROCS /home/ca-alogsdail/fhi-aims-gnu/bin/aims.$VERSION.scalapack.mpi.x',
+        'isambard3' : 'time srun  /projects/c5b/software/fhi-aims/release/250822/bin/aims.$VERSION.scalapack.mpi.x',
+        'archer2':    'srun --cpu-bind=cores --distribution=block:block --hint=nomultithread  /work/e05/e05-files-log/shared/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x',
+        'young':      'gerun  /home/mmm0170/Software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x',
+        'aws':        'time srun --mpi=pmi2 --hint=nomultithread --distribution=block:block  apptainer exec /shared/logsdail_group/sing/mkl_aims_2.sif bash /shared/logsdail_group/sing/sing_fhiaims_script.sh $@'
     }
 
     expected_paths_taskfarm = {
-        'hawk': "time srun --nodes=1 --ntasks=40 -d mpirun /apps/local/projects/scw1057/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x",
-        'hawk-amd': 'time srun --nodes=1 --ntasks=64 -d mpirun /apps/local/projects/scw1057/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x',
-        'isambard': '',
-        'archer2': 'srun --cpu-bind=cores --distribution=block:block --hint=nomultithread --nodes=1 --ntasks=128 /work/e05/e05-files-log/shared/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x',
-        'young': '',
-        'aws': 'time srun --mpi=pmi2 --hint=nomultithread --distribution=block:block --nodes=1 --ntasks=72 apptainer exec /shared/logsdail_group/sing/mkl_aims_2.sif bash /shared/logsdail_group/sing/sing_fhiaims_script.sh $@'
+        'hawk':      "time srun --nodes=1 --ntasks=40 -d mpirun /apps/local/projects/scw1057/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x",
+        'hawk-amd':  'time srun --nodes=1 --ntasks=64 -d mpirun /apps/local/projects/scw1057/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x',
+        'isambard':  '',
+        'isambard3': '',
+        'archer2':   'srun --cpu-bind=cores --distribution=block:block --hint=nomultithread --nodes=1 --ntasks=128 /work/e05/e05-files-log/shared/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x',
+        'young':     '',
+        'aws':       'time srun --mpi=pmi2 --hint=nomultithread --distribution=block:block --nodes=1 --ntasks=72 apptainer exec /shared/logsdail_group/sing/mkl_aims_2.sif bash /shared/logsdail_group/sing/sing_fhiaims_script.sh $@'
     }
 
-    for hpc in ['hawk', 'hawk-amd', 'isambard', 'archer2', 'young', 'aws']:
+    # Dummy version number for testing purposes
+    os.environ['VERSION'] = "$VERSION"
+
+    for hpc in ['hawk', 'hawk-amd', 'isambard', 'isambard3', 'archer2', 'young', 'aws']:
         '''Assign the executable command based on HPC'''
         set_aims_command(hpc)
 
