@@ -150,7 +150,7 @@ def compute_elasticity_tensor(strain_tensor,stress_tensor,write_elasticity_tenso
 
     Returns
     -------
-    C : numpy.ndarray
+    elasticity_tensory : numpy.ndarray
         The fourth-rank elasticity tensor (C_{ijkl})
 
     Notes
@@ -177,6 +177,23 @@ def compute_elasticity_tensor(strain_tensor,stress_tensor,write_elasticity_tenso
     return elasticity_tensor
 
 def write_elasticity_output(stress_tensor, strain_tensor, elasticity_tensor):
+    """
+    Writes an output file (.txt format) which includes summary information such as the complete strain and stress
+    tensors and the unique values of elasticity tensor in the units of Pa and eV/Å³.
+
+    Parameters
+    ----------
+    strain_tensor : numpy.ndarray
+        Array of shape (N, 3, 3) containing the applied strain tensors,
+        where N is the number of deformation structures. Each element is a
+        symmetric 3×3 strain tensor.
+    stress_tensor : numpy.ndarray
+        Array of shape (N, 3, 3) containing the resulting stress tensors
+        corresponding to each strain in `strain_tensor`. Units depend on the underlying simulation code.
+    elasticity_tensor : numpy.ndarray
+        The fourth-rank elasticity tensor (C_{ijkl})
+    """
+
     import numpy as np
     try:
         f = open('elasticity_tensor_calculation_output.txt', 'x')
