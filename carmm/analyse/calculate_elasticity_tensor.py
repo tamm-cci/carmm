@@ -1,10 +1,13 @@
-def read_strain_tensor_from_pkl(pkl_file):
+import os
+
+
+def read_strain_tensor_from_pkl(pkl_file_path):
     """
     Load a strain tensor from a pickle (.pkl) file.
 
     Parameters
     ----------
-    pkl_file : str
+    pkl_file_path : str
         Path to the pickle file containing the stored strain tensor.
         The file is expected to contain either:
         - a NumPy array of shape (N, 3, 3), where N is the number of deformed structures
@@ -21,7 +24,7 @@ def read_strain_tensor_from_pkl(pkl_file):
       write_strain=True.
     """
     import pickle
-    with open(pkl_file, 'rb') as fp:
+    with open(pkl_file_path, 'rb') as fp:
         strain_tensor = pickle.load(fp)
     return strain_tensor
 
@@ -32,7 +35,7 @@ def read_stress_from_outputs(path=None, output_file_type='.out'):
     Parameters
     ----------
     path: str, optional
-        Path pointing towards the directory that contains calculations on all the deformed structure.
+        Path pointing towards the directory that contains calculations on all the deformed structures (i.e working directory).
         Currently, the function expects the directory to have the following structure
         ---> defor_1
         ---> defor_2
@@ -72,7 +75,7 @@ def read_stress_from_outputs(path=None, output_file_type='.out'):
     file_ext = ['.traj', '.xyz']
     if output_file_type in file_ext:
         stress_list = []
-        for defor in os.listdir():
+        for defor in os.listdir(home):
             if os.path.isdir(f'{home}/{defor}'):
                 for file in os.listdir(f'{home}/{defor}'):
                     if file.endswith(output_file_type):
@@ -127,7 +130,7 @@ def read_stress_from_outputs(path=None, output_file_type='.out'):
             f'The file extension provided is not supported. Please make sure it is one of the following [.traj, .xyz, .out]')
 
 
-def compute_elasticity_tensor(strain_tensor,stress_tensor,write_elasticity_tensor=True,write_output=True):
+def compute_elasticity_tensor(strain_tensor,stress_tensor,path=None,write_elasticity_tensor=True,write_output=True):
     """
     Compute the elasticity tensor from strain and stress tensors.
 
@@ -140,6 +143,11 @@ def compute_elasticity_tensor(strain_tensor,stress_tensor,write_elasticity_tenso
     stress_tensor : numpy.ndarray
         Array of shape (N, 3, 3) containing the resulting stress tensors
         corresponding to each strain in `strain_tensor`. Units depend on the underlying simulation code.
+    path: str, optional
+        Path pointing towards the directory that is working directory for this workflow.
+        In this function, the path will be used to write the elasticity tensor as a .pkl file and an output summary as
+        txt file.
+        If None, the current working directory will be used.
     write_elasticity_tensor : bool, optional
         If True (default), write the computed fourth-rank elasticity tensor
         (C_{ijkl}) to disk as pickle (.pkl) file.
@@ -163,19 +171,24 @@ def compute_elasticity_tensor(strain_tensor,stress_tensor,write_elasticity_tenso
     import pickle
     import numpy as np
     from pymatgen.analysis.elasticity import diff_fit
+    import os
     elasticity_tensor = diff_fit(strain_tensor, stress_tensor, order=2)
-    print(np.unique(np.array(elasticity_tensor[0]), return_index=True)[0] * 160.2716621)
+    #print(np.unique(np.array(elasticity_tensor[0]), return_index=True)[0] * 160.2716621)
+
+    if path is None:
+        path = os.getcwd()
 
     if write_output:
-        write_elasticity_output(stress_tensor,strain_tensor,elasticity_tensor)
+        write_elasticity_output(stress_tensor,strain_tensor,elasticity_tensor,path)
 
     if write_elasticity_tensor:
-        with open('elasticity_tensor.pkl', 'wb') as fp:
+        with open(f'{path}/elasticity_tensor.pkl', 'wb') as fp:
             pickle.dump(np.array(elasticity_tensor[0]), fp)
 
-    return elasticity_tensor
 
-def write_elasticity_output(stress_tensor, strain_tensor, elasticity_tensor):
+    return elasticity_tensor[0]
+
+def write_elasticity_output(stress_tensor, strain_tensor, elasticity_tensor, path):
     """
     Writes an output file (.txt format) which includes summary information such as the complete strain and stress
     tensors and the unique values of elasticity tensor in the units of Pa and eV/Å³.
@@ -201,12 +214,12 @@ def write_elasticity_output(stress_tensor, strain_tensor, elasticity_tensor):
 
     import numpy as np
     try:
-        f = open('elasticity_tensor_calculation_output.txt', 'x')
+        f = open(f'{path}/elasticity_tensor_calculation_output.txt', 'x')
         f.close()
     except:
-        print('The file already exists. Overwriting the file...')
+        print('The file already exists. Overwriting the elasticity_tensor_calculation_output.txt file...')
 
-    f = open('elasticity_tensor_calculation_output.txt', 'w')
+    f = open(f'{path}/elasticity_tensor_calculation_output.txt', 'w')
     f.write('Unique values in elasticity tensor in units of Pascals (Pa).\n')
     f.write(str(np.round(np.unique(np.array(elasticity_tensor[0]), return_index=True)[0], 3) * 160.2176621) + '\n')
     f.write('Unique values in elasticity tensor in units of eV/Å³.\n')

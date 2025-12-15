@@ -1,7 +1,7 @@
 #=======================================================
 # FHI-aims file: data/elasticity_tensor_workflow\defor_9/geometry.in
 # Created using the Atomic Simulation Environment (ASE)
-# Mon Dec 15 15:26:01 2025
+# Mon Dec 15 15:42:15 2025
 #=======================================================
 lattice_vector 3.5211070668581561 -0.0000000019583704 0.0000000009887105 
 lattice_vector -0.0000000015141035 3.5211091468665829 0.0000000221997037 
