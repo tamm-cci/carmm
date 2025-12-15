@@ -35,7 +35,7 @@ def translation(model, axis=0, surface="111", m_m_dist=None):
 
 
     # Retrieve constraints from the model for later
-    constraint = model._get_constraints()
+    constraint = model.constraints
 
     '''Section on variables'''
     indices_to_move = []
@@ -149,7 +149,7 @@ def wrap_fcc(model, surface):
 
     model = model.copy()
     # Retrieve constraints from the model for later
-    constraint = model._get_constraints()
+    constraint = model.constraints
 
     '''Section on index correction'''
     model = sort_by_xyz(model, surface)
@@ -297,7 +297,7 @@ def mirror(model, center_index, plane="y", surf="111", m_m_dist=None):
     planes = {"x":0, "y":1}
     axis = planes[plane]
 
-    constraint = model._get_constraints()
+    constraint = model.constraints
     model.set_constraint()
 
     # Save initial center atom position
@@ -367,7 +367,7 @@ def rotate_fcc(model, surf, center_index=0, m_m_dist=None):
         # TODO Error message
 
     # Remove constraints for rotation operation
-    prev_const = model._get_constraints()
+    prev_const = model.constraints
     model.set_constraint()
     # this variable does not survive other operations unchanged, hence deepcopy
     center_atom_position = copy.deepcopy(model[center_index].position)
