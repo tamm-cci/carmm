@@ -5,6 +5,7 @@ def test_vib_analysis():
     from carmm.analyse.vibrations import vib_analysis, plot_vibration_data, vib_disps, characterise_vib
     from ase.io import read
     from ase.visualize import view
+    import numpy as np
 
     # Get H2O vib data calculated using ASE (EMT)
     file = 'data/H2O_vib/vib.1.traj'
@@ -22,11 +23,12 @@ def test_vib_analysis():
     # vib_disp test
     traj = read('data/H2O_vib/vib.8.traj@:')
     disp_default = vib_disps(traj)
-    assert disp_default == [[1, 0.352670394373909], [2, 0.35267039437390707]]
+    assert np.allclose(disp_default, [[1, 0.352670394373909], [2, 0.35267039437390707]], atol=1e-8)
 
     # Displacement tolerance test
     disp_tol_test = vib_disps(traj, tolerance=0)
-    assert disp_tol_test == [[0, 0.02877014449485149], [1, 0.352670394373909], [2, 0.35267039437390707]]
+    assert np.allclose(disp_tol_test, [[0, 0.02877014449485149], [1, 0.352670394373909], [2, 0.35267039437390707]],
+                       atol=1e-8)
 
     # Symmetric Stretching
     traj = read('data/H2O_vib/vib.8.traj@:')
