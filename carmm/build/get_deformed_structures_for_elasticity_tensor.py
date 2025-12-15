@@ -64,7 +64,7 @@ def generate_deformed_strutures(atoms_object, norm_strains = [0.01, 0.03], shear
 
     return structure, deformations
 
-def create_files_and_directories(structure, deformations, file_format='.in', copy_input_and_submission=False):
+def create_files_and_directories(structure, deformations, path=None, file_format='.in', copy_input_and_submission=False):
     """
     Create directory for each deformed configuration and write the
     corresponding structural files. Optionally copy additional input and
@@ -79,13 +79,25 @@ def create_files_and_directories(structure, deformations, file_format='.in', cop
         A list of deformed structures (e.g., generated from strain or
         displacement operations). Each element corresponds to one output
         directory.
+    path: str, optional
+        Path pointing towards the directory that will be working directory for this workflow.
+        Make sure that this path is used in the read_stress_from_output() function of calculate_elasticity_tensor.py
+        during the post-processing of results.
+        The function will create the following structure in the path specified
+        ---> defor_1
+        ---> defor_2
+        ...
+        ---> defor_n
+        where defor_1, defor_2,... contains the deformed structures for first-principles/force-field calculations
+        structures.
+        If None, the current working directory will be used.
     file_format: str, optional
     format of the saved deformed geometry file in each directory.
         Default is .in format.
     copy_input_and_submission : bool, optional
         If True, copy the input.py files and batch submission scripts
-        into every generated directory. Default is False. If setting to True, make sure your current working directory
-        contains an input.py and submission.script file
+        into every generated directory. Default is False. If setting to True, make sure the path you provide using 'path'
+        argument contains an input.py and submission.script file
 
     Returns
     -------
@@ -108,19 +120,23 @@ def create_files_and_directories(structure, deformations, file_format='.in', cop
     from pymatgen.io.ase import AseAtomsAdaptor
     deformed_struct = [defo.apply_to_structure(structure) for defo in deformations]
 
+    if path is None:
+        home = os.getcwd()
+    else:
+        home = path
+
     for i, def_struc in enumerate(deformed_struct):
         dir_no = i + 1
         directory = f'defor_{dir_no}'
-        parent_dir = os.getcwd()
-        path_final = os.path.join(parent_dir, directory)
+        path_final = os.path.join(home, directory)
         if os.path.exists(path_final):
             shutil.rmtree(path_final)
         os.mkdir(path_final)
         atoms = AseAtomsAdaptor.get_atoms(def_struc)
         atoms.write(path_final + f'/geometry.{file_format}')
         if copy_input_and_submission:
-            shutil.copy(parent_dir + '/input.py', path_final + '/input.py')
-            shutil.copy(parent_dir + '/submission.script', path_final + '/submission.script')
+            shutil.copy(home + '/input.py', path_final + '/input.py')
+            shutil.copy(home + '/submission.script', path_final + '/submission.script')
 
 
 

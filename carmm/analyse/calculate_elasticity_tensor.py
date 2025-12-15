@@ -32,9 +32,8 @@ def read_stress_from_outputs(path=None, output_file_type='.out'):
     Parameters
     ----------
     path: str, optional
-        Path pointing toward the directory that contains calculations on all the deformed structure.
+        Path pointing towards the directory that contains calculations on all the deformed structure.
         Currently, the function expects the directory to have the following structure
-        Directory
         ---> defor_1
         ---> defor_2
         ...
@@ -192,6 +191,12 @@ def write_elasticity_output(stress_tensor, strain_tensor, elasticity_tensor):
         corresponding to each strain in `strain_tensor`. Units depend on the underlying simulation code.
     elasticity_tensor : numpy.ndarray
         The fourth-rank elasticity tensor (C_{ijkl})
+
+    Returns
+    -------
+    None
+        This function writes output text to disk.
+
     """
 
     import numpy as np
