@@ -168,34 +168,40 @@ def compute_elasticity_tensor(strain_tensor,stress_tensor,write_elasticity_tenso
     print(np.unique(np.array(elasticity_tensor[0]), return_index=True)[0] * 160.2716621)
 
     if write_output:
-        try:
-            f = open('elasticity_tensor_calculation_output.txt', 'x')
-            f.close()
-        except:
-            print('The file already exists. Overwriting the file...')
-
-        f = open('elasticity_tensor_calculation_output.txt', 'w')
-        f.write('Unique values in elasticity tensor in units of Pascals (Pa).\n')
-        f.write(str(np.round(np.unique(np.array(elasticity_tensor[0]), return_index=True)[0],3) * 160.2176621) + '\n')
-        f.write('Unique values in elasticity tensor in units of eV/Å³.\n')
-        f.write(str(np.round(np.unique(np.array(elasticity_tensor[0]), return_index=True)[0],3)) + '\n')
-        f.write('Elasticity tensor in full. The above values show the unique values in the tensor.\n')
-        f.write(str(np.array(elasticity_tensor[0])) + '\n')
-        f.write('Stress tensor for all deformations in full. Shape is Nx3x3 where N is the number of deformations '
-                'used to compute the elasticity tensor.\n')
-        f.write(str(stress_tensor)+'\n')
-        f.write(str(stress_tensor.shape)+'\n')
-        f.write('Strain tensor for all deformations in full. Shape is Nx3x3 where N is the number of deformations '
-                'used to compute the elasticity tensor.\n')
-        f.write(str(strain_tensor)+'\n')
-        f.write(str(strain_tensor.shape)+'\n')
-        f.close()
+        write_elasticity_output(stress_tensor,strain_tensor,elasticity_tensor)
 
     if write_elasticity_tensor:
         with open('elasticity_tensor.pkl', 'wb') as fp:
             pickle.dump(np.array(elasticity_tensor[0]), fp)
 
     return elasticity_tensor
+
+def write_elasticity_output(stress_tensor, strain_tensor, elasticity_tensor):
+    import numpy as np
+    try:
+        f = open('elasticity_tensor_calculation_output.txt', 'x')
+        f.close()
+    except:
+        print('The file already exists. Overwriting the file...')
+
+    f = open('elasticity_tensor_calculation_output.txt', 'w')
+    f.write('Unique values in elasticity tensor in units of Pascals (Pa).\n')
+    f.write(str(np.round(np.unique(np.array(elasticity_tensor[0]), return_index=True)[0], 3) * 160.2176621) + '\n')
+    f.write('Unique values in elasticity tensor in units of eV/Å³.\n')
+    f.write(str(np.round(np.unique(np.array(elasticity_tensor[0]), return_index=True)[0], 3)) + '\n')
+    f.write('Elasticity tensor in full. The above values show the unique values in the tensor.\n')
+    f.write(str(np.array(elasticity_tensor[0])) + '\n')
+    f.write('Stress tensor for all deformations in full. Shape is Nx3x3 where N is the number of deformations '
+            'used to compute the elasticity tensor.\n')
+    f.write(str(stress_tensor) + '\n')
+    f.write(str(stress_tensor.shape) + '\n')
+    f.write('Strain tensor for all deformations in full. Shape is Nx3x3 where N is the number of deformations '
+            'used to compute the elasticity tensor.\n')
+    f.write(str(strain_tensor) + '\n')
+    f.write(str(strain_tensor.shape) + '\n')
+    f.close()
+
+
 
 
 
