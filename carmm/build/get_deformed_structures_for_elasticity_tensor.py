@@ -1,4 +1,4 @@
-def generate_deformed_strutures(atoms_object, norm_strains = [0.01, 0.03], shear_strains = [0.01, 0.03], write_strain=True):
+def generate_deformed_strutures(atoms_object, path=None, norm_strains = [0.01, 0.03], shear_strains = [0.01, 0.03], write_strain=True):
     """
     Generate a set of deformed atomic structures by applying normal and shear
     strain to the input structure.
@@ -8,6 +8,10 @@ def generate_deformed_strutures(atoms_object, norm_strains = [0.01, 0.03], shear
     atoms_object : ase.Atoms
         The undeformed equilibrium atomic structure from which strained configurations
         will be generated.
+    path: str, optional
+        Path pointing towards the directory that will be the working directory for this workflow.
+        In this function, the path will be used to write the strain tensor as a .pkl file.
+        If None, the current working directory will be used.
     norm_strains : list of float, optional
         A list of normal strain magnitudes to apply along the principal
         directions. Each value produces 3 separate deformed structures. For example [0.01] produces three different
@@ -59,8 +63,12 @@ def generate_deformed_strutures(atoms_object, norm_strains = [0.01, 0.03], shear
 
     if write_strain:
         strain_tensor = np.array(strain_list)
-        with open('strain_tensor.pkl', 'wb') as fp:
-            pickle.dump(strain_tensor, fp)
+        if path is None:
+            with open('strain_tensor.pkl', 'wb') as fp:
+                pickle.dump(strain_tensor, fp)
+        else:
+            with open(f'{path}/strain_tensor.pkl', 'wb') as fp:
+                pickle.dump(strain_tensor, fp)
 
     return structure, deformations
 
@@ -133,7 +141,7 @@ def create_files_and_directories(structure, deformations, path=None, file_format
             shutil.rmtree(path_final)
         os.mkdir(path_final)
         atoms = AseAtomsAdaptor.get_atoms(def_struc)
-        atoms.write(path_final + f'/geometry.{file_format}')
+        atoms.write(path_final + f'/geometry{file_format}')
         if copy_input_and_submission:
             shutil.copy(home + '/input.py', path_final + '/input.py')
             shutil.copy(home + '/submission.script', path_final + '/submission.script')
