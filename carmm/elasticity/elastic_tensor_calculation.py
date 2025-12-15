@@ -25,12 +25,24 @@ def read_strain_tensor_from_pkl(pkl_file):
         strain_tensor = pickle.load(fp)
     return strain_tensor
 
-def read_stress_from_outputs(output_file_type='.out'):
+def read_stress_from_outputs(path=None, output_file_type='.out'):
     """
     Read and extract the stress tensor from simulation output files.
 
     Parameters
     ----------
+    path: str, optional
+        Path pointing toward the directory that contains calculations on all the deformed structure.
+        Currently, the function expects the directory to have the following structure
+        Directory
+        ---> defor_1
+        ---> defor_2
+        ...
+        ---> defor_n
+        where defor_1, defor_2,... contains the first-principles or force-field calculation outputs on the deformed
+        structures.
+        If None, the current working directory will be used.
+
     output_file_type : str, optional
         File extension specifying the type of output file to
         parse. Default is '.out'. Typical values include:
@@ -54,7 +66,10 @@ def read_stress_from_outputs(output_file_type='.out'):
     from ase.io import read
     import numpy as np
     import os
-    home = os.getcwd()
+    if path is None:
+        home = os.getcwd()
+    else:
+        home = path
     file_ext = ['.traj', '.xyz']
     if output_file_type in file_ext:
         stress_list = []
