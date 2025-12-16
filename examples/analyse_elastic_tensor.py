@@ -4,7 +4,7 @@ def test_compute_elasticity_tensor():
     from carmm.analyse.calculate_elasticity_tensor import read_strain_tensor_from_pkl, read_stress_from_outputs, compute_elasticity_tensor
 
     #example_path = r'C:\Users\akash\OneDrive - Cardiff University\Desktop\FT crystals data\carmm\carmm\examples\data\elasticity_tensor_workflow'
-    example_path = 'data/elasticity_tensor_workflow'
+    example_path = './data/elasticity_tensor_workflow'
     strain_tensor = read_strain_tensor_from_pkl(f'{example_path}/strain_tensor.pkl')
     stress_tensor = read_stress_from_outputs(path=example_path,output_file_type='.xyz')
     elasticity_tensor = compute_elasticity_tensor(strain_tensor, stress_tensor=stress_tensor, path=example_path)
