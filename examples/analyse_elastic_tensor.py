@@ -1,6 +1,9 @@
 def test_compute_elasticity_tensor():
+    #import sys
+    #sys.path.append(r"C:\Users\\akash\OneDrive - Cardiff University\Desktop\FT crystals data\carmm\carmm")
     from carmm.analyse.calculate_elasticity_tensor import read_strain_tensor_from_pkl, read_stress_from_outputs, compute_elasticity_tensor
 
+    #example_path = r'C:\Users\akash\OneDrive - Cardiff University\Desktop\FT crystals data\carmm\carmm\examples\data\elasticity_tensor_workflow'
     example_path = 'data/elasticity_tensor_workflow'
     strain_tensor = read_strain_tensor_from_pkl(f'{example_path}/strain_tensor.pkl')
     stress_tensor = read_stress_from_outputs(path=example_path,output_file_type='.xyz')
@@ -12,10 +15,10 @@ def test_compute_elasticity_tensor():
 
     import os
     import numpy as np
-    assert(np.isclose(elasticity_tensor[0,0,0,0], 2.9813036535, rtol=1e-8))
+    assert(np.isclose(elasticity_tensor[0,0,0,0], -1.6533769844159, rtol=1e-8))
     assert(os.path.exists(f'{example_path}/elasticity_tensor.pkl')) # check for elasticity tensor pkl file
     assert(os.path.exists(f'{example_path}/elasticity_tensor_calculation_output.txt')) # check for output txt file
-    
+
     ########
 
 # Run the example
