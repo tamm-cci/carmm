@@ -1,53 +1,55 @@
-def coord_number(atoms, a=3.6, lattice='fcc', siteIndices=None):
+def coord_number(atoms, indices=None):
     '''
-    Coordination number calculator for clean-cut slab from ideal bulk structure
+    Calculate the coordination number and neighbouring atoms for any given atom or list of atoms
+
+    Parameters:
+    
+    atoms: An ASE atoms object
+        The object to be interrogated
+    indices: 
+        A list of index values for which the coordination number must be calculated
+    Returns:
+        - A list of coordination numbers for each interrogated species 
+        - A list of neighbours for each interrogated species
     '''
-    # The list that stores coordination number for each atom
+
+    from carmm.analyse.neighbours import neighbours
+
     cn_list = []
-    # The list that stores the indices of first nearst neighbours for each atom
-    # This is a list of fnn index lists
     fnn_list = []
 
-    if lattice == 'fcc':
-        bond = round(a / 2 ** 0.5, 3)
-    elif lattice == 'bcc':
-        bond = round(a * (3 ** 0.5) / 2, 3)
+    if indices is None:
+        raise ValueError("An integer value in a list form, or list of integers, is needed to evaluate the GCN")
 
-
-    for i in siteIndices:
-        cn = 0
-        # List for first nearest neighbours of atom i
-        fnn = []
-        # Counting coordination number for atom i
-        for atom_j in atoms:
-            j = atom_j.index
-            # Skip the iteration if we are considering the distance
-            # between atom i and itself
-            if i == j:
-                continue
-            elif abs(atoms[i].z-atom_j.z) > 4:
-                continue
-            # Check if atom i and atom j are first nearst neighbours
-            dist = atoms.get_distance(i, j, mic=True)
-            if dist <= bond+0.001 and dist >= bond-0.001:
-                cn += 1
-                fnn.append(j)
-
-        # Append coordination number and first nearest neighbours to the lists every time the second j loop finishes.
-        cn_list.append(cn)
-        fnn_list.append(fnn)
+    for i in indices:
+        all_neighbour_atoms, shell_list, selection = neighbours(atoms, [i], 1, verbose=False)
+        cn_list.append(len(shell_list[1]))
+        fnn_list.append(shell_list[1])
 
     return cn_list, fnn_list
 
-def fnn_set(fnnLists):
+def fnn_set(fnn_lists):
     """
-    :param fnnLists
-    :return: Set of all fnns
+    This converts a list of lists into a flatten 1D list of integers
+
+    Parameters:
+
+    fnn_lists: List of integer lists 
+        Contains the first-nearest neighbours for each atom
+    Returns:
+        - A flattened and unique 1D list of all possible second neighbours (neighbours of first neighbours)    
+ 
     """
-    allfnn = []
-    for fnn in fnnLists:
-        allfnn += fnn
-    return set(allfnn)
+    
+    all_fnn = []
+    for fnn in fnn_lists:
+        all_fnn += fnn
+    
+    # Demonstration how to do the above in one line - saving for referece
+    # all_fnn = [fnn for fnn_list in fnn_lists for fnn in fnn_list]
+
+    # Make the list unique
+    return set(all_fnn)
     
 def general_coord_number(lattice='fcc', element='Cu', a=3.6, facet=(1,1,1), site='ontop'):
 
@@ -63,7 +65,6 @@ def general_coord_number(lattice='fcc', element='Cu', a=3.6, facet=(1,1,1), site
     :return: gcn. Generalized coordination number
     """
     from ase.build import surface, bulk
-    from ase.visualize import view
     import numpy as np
 
     sum_fnn_cn = 0 # The sum of CN of fnn
@@ -75,7 +76,7 @@ def general_coord_number(lattice='fcc', element='Cu', a=3.6, facet=(1,1,1), site
     
     if lattice not in ['fcc', 'bcc']:
         print('Only support fcc and bcc for now')
-        return 'gcn failed'
+        raise KeyError('Generalised coordination number is only supported for FCC and BCC lattice')
     
 
     metalbulk = bulk(element, lattice, a=a, cubic=True)
@@ -116,20 +117,19 @@ def general_coord_number(lattice='fcc', element='Cu', a=3.6, facet=(1,1,1), site
 
     # Shift the indices to the centre of the surface to bulk interior
     innersiteIndices = [siteIndices[0]-9*toplayerSize]
-    cn, fnn = coord_number(slab, lattice=lattice, siteIndices=innersiteIndices)
+    cn, fnn = coord_number(slab, innersiteIndices)
     cn_max = len(fnn_set(fnn))
     print('CN-max ', cn_max)
 
-    cn, fnn = coord_number(slab, lattice=lattice, siteIndices=siteIndices)
+    cn, fnn = coord_number(slab, siteIndices)
     fnn_site = fnn_set(fnn)  # extracting the fnn of the site
     
     #  the CN of fnns
-    cn_fnn_site, fnn_f = coord_number(slab, lattice=lattice, siteIndices=fnn_site)
+    cn_fnn_site, fnn_f = coord_number(slab, fnn_site)
 
     for n in cn_fnn_site:
         sum_fnn_cn += n   # calculating cn(j)
 
     gcn = sum_fnn_cn / cn_max   # dividing summation by cn_max (can do as cn_max is a constant)
-    # view(slab)
     return gcn
 
