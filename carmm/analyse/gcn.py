@@ -117,7 +117,12 @@ def setup_metal_slab_for_general_coordination_number_calculation(lattice='fcc', 
     cn_max = len(flatten_list_and_make_unique(fnn))
     print('CN-max ', cn_max)
 
-    return generalised_coordination_number(slab, siteIndices, cn_max)
+    # Return important variables for next calculation
+    return slab, siteIndices, cn_max
+
+    # Would be used if we wanted to connect straight into calculation ... but ...
+    # we should separate the setup from the calculation, so a user can manipulate
+    #return generalised_coordination_number(slab, siteIndices, cn_max)
 
 
 def generalised_coordination_number(slab, site_index, cn_max): 
