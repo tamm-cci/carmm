@@ -28,28 +28,28 @@ def coord_number(atoms, indices=None):
 
     return cn_list, fnn_list
 
-def fnn_set(fnn_lists):
+def flatten_list_and_make_unique(list_of_lists):
     """
-    This converts a list of lists into a flatten 1D list of integers
+    This converts a list of lists into a flatten 1D list of integers with unique values
 
     Parameters:
 
-    fnn_lists: List of integer lists 
+    list_of_lists: List of integer lists 
         Contains the first-nearest neighbours for each atom
     Returns:
         - A flattened and unique 1D list of all possible second neighbours (neighbours of first neighbours)    
  
     """
     
-    all_fnn = []
-    for fnn in fnn_lists:
-        all_fnn += fnn
+    all_values = []
+    for list in list_of_lists:
+        all_values += list
     
     # Demonstration how to do the above in one line - saving for referece
-    # all_fnn = [fnn for fnn_list in fnn_lists for fnn in fnn_list]
+    # all_values = [value for list in list_of_lists for value in list]
 
     # Make the list unique
-    return set(all_fnn)
+    return set(all_values)
     
 def general_coord_number(lattice='fcc', element='Cu', a=3.6, facet=(1,1,1), site='ontop'):
 
@@ -118,11 +118,11 @@ def general_coord_number(lattice='fcc', element='Cu', a=3.6, facet=(1,1,1), site
     # Shift the indices to the centre of the surface to bulk interior
     innersiteIndices = [siteIndices[0]-9*toplayerSize]
     cn, fnn = coord_number(slab, innersiteIndices)
-    cn_max = len(fnn_set(fnn))
+    cn_max = len(flatten_list_and_make_unique(fnn))
     print('CN-max ', cn_max)
 
     cn, fnn = coord_number(slab, siteIndices)
-    fnn_site = fnn_set(fnn)  # extracting the fnn of the site
+    fnn_site = flatten_list_and_make_unique(fnn)  # extracting the fnn of the site
     
     #  the CN of fnns
     cn_fnn_site, fnn_f = coord_number(slab, fnn_site)
