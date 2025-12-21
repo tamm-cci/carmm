@@ -1,4 +1,4 @@
-def coord_number(atoms, indices=None):
+def coord_number(atoms, site_indices=None):
     '''
     Calculate the coordination number and neighbouring atoms for any given atom or list of atoms
 
@@ -6,7 +6,7 @@ def coord_number(atoms, indices=None):
     
     atoms: An ASE atoms object
         The object to be interrogated
-    indices: 
+    site_indices: 
         A list of index values for which the coordination number must be calculated
     Returns:
         - A list of coordination numbers for each interrogated species 
@@ -18,10 +18,10 @@ def coord_number(atoms, indices=None):
     cn_list = []
     fnn_list = []
 
-    if indices is None:
+    if site_indices is None:
         raise ValueError("An integer value in a list form, or list of integers, is needed to evaluate the GCN")
 
-    for i in indices:
+    for i in site_indices:
         all_neighbour_atoms, shell_list, selection = neighbours(atoms, [i], 1, verbose=False)
         cn_list.append(len(shell_list[1]))
         fnn_list.append(shell_list[1])
@@ -51,14 +51,12 @@ def flatten_list_and_make_unique(list_of_lists):
     # Make the list unique
     return set(all_values)
     
-def general_coord_number(lattice='fcc', element='Cu', a=3.6, facet=(1,1,1), site='ontop'):
+def setup_metal_slab_for_general_coordination_number_calculation(lattice='fcc', element='Cu', a=3.6, facet=(1,1,1), site='ontop'):
 
     """
-    GCN calculator. Only works with perfect metal slab from bulk structure for now. Accepting abitrary atoms object is not implemented for now.
-    See: 
-    Calle-Vallejo, F. (2023). Advanced Science, 10(20), 2207644. https://doi.org/10.1002/ADVS.202207644
-    Zhao, Z., et al. (2016). Journal of Physical Chemistry C, 120(49), 28125–28130. https://doi.org/10.1021/ACS.JPCC.6B10155/
-    
+       
+
+
     :param lattice: crystal structure
     :param facet: tuple, e.g. (1,1,1)
     :param site: 'ontop', 'bridge'
@@ -77,7 +75,6 @@ def general_coord_number(lattice='fcc', element='Cu', a=3.6, facet=(1,1,1), site
     if lattice not in ['fcc', 'bcc']:
         print('Only support fcc and bcc for now')
         raise KeyError('Generalised coordination number is only supported for FCC and BCC lattice')
-    
 
     metalbulk = bulk(element, lattice, a=a, cubic=True)
     slab = surface(metalbulk, facet, layers=20, vacuum=20)
@@ -96,7 +93,6 @@ def general_coord_number(lattice='fcc', element='Cu', a=3.6, facet=(1,1,1), site
             x = slab[index].x
             y = slab[index].y
             lastIndex = index
-
     
     # FCC cn_max = 12
     
@@ -121,15 +117,41 @@ def general_coord_number(lattice='fcc', element='Cu', a=3.6, facet=(1,1,1), site
     cn_max = len(flatten_list_and_make_unique(fnn))
     print('CN-max ', cn_max)
 
-    cn, fnn = coord_number(slab, siteIndices)
-    fnn_site = flatten_list_and_make_unique(fnn)  # extracting the fnn of the site
+    return generalised_coordination_number(slab, siteIndices, cn_max)
+
+
+def generalised_coordination_number(slab, site_index, cn_max): 
+
+    """
+    Calculator for the generalised coordination number of an atom on a surface. 
+    Can work for _any_ system but one must know the bulk coordination number for a given species.    
+ 
+    See:
+      Calle-Vallejo, F. (2023). Advanced Science, 10(20), 2207644. https://doi.org/10.1002/ADVS.202207644
+      Zhao, Z., et al. (2016). Journal of Physical Chemistry C, 120(49), 28125–28130. https://doi.org/10.1021/ACS.JPCC.6B10155/
+
+    Parameters:
     
-    #  the CN of fnns
-    cn_fnn_site, fnn_f = coord_number(slab, fnn_site)
+    slab: ASE atoms object
+        Representation of the surface for consideration
+    site_index: Integer
+        The site of interest for which GCN should be calculated
+    cn_max: Integer
+        The maximum coordination number for the species being considered
+    TODO: Could this also be considered a string, with values stored for common entries (FCC, BCC, etc.)?
 
-    for n in cn_fnn_site:
-        sum_fnn_cn += n   # calculating cn(j)
+    Returns:
+      - Float value of the generalised coordination number
 
-    gcn = sum_fnn_cn / cn_max   # dividing summation by cn_max (can do as cn_max is a constant)
+    """
+
+    # Calculate first nearest neighbours, and their coordination
+    _, first_nearest_neighbours = coord_number(slab, site_index)
+    fnn_flattened = flatten_list_and_make_unique(first_nearest_neighbours)
+    coordination_of_fnn, _ = coord_number(slab, fnn_flattened)
+
+    # Dividing summation by cn_max (can do as cn_max is a constant)	
+    gcn = sum(coordination_of_fnn) / cn_max  
+    
     return gcn
 

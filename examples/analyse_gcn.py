@@ -1,13 +1,13 @@
 # This is testing script for gcn calculator.
-from carmm.analyse.gcn import general_coord_number
+from carmm.analyse.gcn import generalised_coordination_number,setup_metal_slab_for_general_coordination_number_calculation 
 
-gcn = general_coord_number(lattice='fcc', facet=(1,1,1), site='ontop')
+gcn = setup_metal_slab_for_general_coordination_number_calculation(lattice='fcc', facet=(1,1,1), site='ontop')
 assert gcn == 7.5
 
-gcn = general_coord_number(lattice='fcc', facet=(1,1,1), site='bridge')
-assert gcn == 12.5 # No reference for this yet
+gcn = setup_metal_slab_for_general_coordination_number_calculation(lattice='fcc', facet=(1,1,1), site='bridge')
+assert gcn == 12.5
 
 try:
-    gcn = general_coord_number(lattice='hcp', facet=(1,1,1), site='ontop')
+    gcn = setup_metal_slab_for_general_coordination_number_calculation(lattice='hcp', facet=(1,1,1), site='ontop')
 except KeyError:
     "Generalised coordination number works only with FCC and BCC lattice"
