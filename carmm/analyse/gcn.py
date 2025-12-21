@@ -38,13 +38,27 @@ def generalised_coordination_number(slab, site_index, cn_max):
 def setup_metal_slab_for_general_coordination_number_calculation(lattice='fcc', element='Cu', a=3.6, facet=(1,1,1), site='ontop'):
 
     """
-       
+    This routine will setup a model system for application of the GCN calculator.
+    It is note a requirement to use this setup function to use the GCN calculator, as you may know the values needed.
+    TODO: Find a better home for this. Maybe in build?   
 
+    Parameters:
 
-    :param lattice: crystal structure
-    :param facet: tuple, e.g. (1,1,1)
-    :param site: 'ontop', 'bridge'
-    :return: gcn. Generalized coordination number
+    lattice: string
+        The crystal structure of the system to be setup. Only fcc and bcc are accepted
+    element: string
+        The element to be used to build the model system
+    a: float
+        The lattice parameter for the model system
+    facet: tuple of integers, e.g. (1,1,1)
+        The crystal facet to be considered for the model system
+    site: string
+        String definition of adsorption site on surface, as per ASE definitions
+    Returns:
+        - An ASE atoms object representing the surface facet
+        - A list of indices that are to be considered the coordination site in this system
+        - The bulk coordination number of such a model system
+
     """
     from carmm.analyse.neighbours import first_nearest_neighbours_list
     from ase.build import surface, bulk
