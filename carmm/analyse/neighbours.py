@@ -165,3 +165,28 @@ def surface_coordination(atoms, cutoff=None, verbose=True):
 
 
     return dict_CN, dict_surf_CN
+
+def first_nearest_neighbours_list(atoms, site_indices=None):
+    '''
+    Calculate the neighbouring atoms for any given atom or list of atoms
+    
+    Parameters:
+
+    atoms: An ASE atoms object
+        The object to be interrogated
+    site_indices:  
+        A list of index values for which the coordination number must be calculated
+    Returns:
+        - A list of neighbours for each interrogated species
+    '''
+
+    fnn_list = []
+
+    if site_indices is None: 
+        raise ValueError("An integer value in a list form, or list of integers, is needed to evaluate the GCN")
+
+    for i in site_indices: 
+        all_neighbour_atoms, shell_list, selection = neighbours(atoms, [i], 1, verbose=False)
+        fnn_list.append(shell_list[1])
+
+    return fnn_list

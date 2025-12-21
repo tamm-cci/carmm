@@ -1,55 +1,39 @@
-def coord_number(atoms, site_indices=None):
-    '''
-    Calculate the coordination number and neighbouring atoms for any given atom or list of atoms
+def generalised_coordination_number(slab, site_index, cn_max): 
 
-    Parameters:
-    
-    atoms: An ASE atoms object
-        The object to be interrogated
-    site_indices: 
-        A list of index values for which the coordination number must be calculated
-    Returns:
-        - A list of coordination numbers for each interrogated species 
-        - A list of neighbours for each interrogated species
-    '''
-
-    from carmm.analyse.neighbours import neighbours
-
-    cn_list = []
-    fnn_list = []
-
-    if site_indices is None:
-        raise ValueError("An integer value in a list form, or list of integers, is needed to evaluate the GCN")
-
-    for i in site_indices:
-        all_neighbour_atoms, shell_list, selection = neighbours(atoms, [i], 1, verbose=False)
-        cn_list.append(len(shell_list[1]))
-        fnn_list.append(shell_list[1])
-
-    return cn_list, fnn_list
-
-def flatten_list_and_make_unique(list_of_lists):
     """
-    This converts a list of lists into a flatten 1D list of integers with unique values
-
-    Parameters:
-
-    list_of_lists: List of integer lists 
-        Contains the first-nearest neighbours for each atom
-    Returns:
-        - A flattened and unique 1D list of all possible second neighbours (neighbours of first neighbours)    
+    Calculator for the generalised coordination number of an atom on a surface. 
+    Can work for _any_ system but one must know the bulk coordination number for a given species.    
  
-    """
-    
-    all_values = []
-    for list in list_of_lists:
-        all_values += list
-    
-    # Demonstration how to do the above in one line - saving for referece
-    # all_values = [value for list in list_of_lists for value in list]
+    See:
+      Calle-Vallejo, F. (2023). Advanced Science, 10(20), 2207644. https://doi.org/10.1002/ADVS.202207644
+      Zhao, Z., et al. (2016). Journal of Physical Chemistry C, 120(49), 28125–28130. https://doi.org/10.1021/ACS.JPCC.6B10155/
 
-    # Make the list unique
-    return set(all_values)
+    Parameters:
+    
+    slab: ASE atoms object
+        Representation of the surface for consideration
+    site_index: Integer
+        The site of interest for which GCN should be calculated
+    cn_max: Integer
+        The maximum coordination number for the species being considered
+    TODO: Could this also be considered a string, with values stored for common entries (FCC, BCC, etc.)?
+
+    Returns:
+      - Float value of the generalised coordination number
+
+    """
+
+    from carmm.analyse.neighbours import first_nearest_neighbours_list
+
+    # Calculate first nearest neighbours, and their coordination
+    first_nearest_neighbours = first_nearest_neighbours_list(slab, site_index)
+    fnn_flattened = flatten_list_and_make_unique(first_nearest_neighbours)
+    list_of_first_neighbours_of_first_neighbours = first_nearest_neighbours_list(slab, fnn_flattened)
+    cn_first_nearest_neighbours = [len(neighbours) for neighbours in list_of_first_neighbours_of_first_neighbours]
+    sum_cn_fnn = sum(cn_first_nearest_neighbours)
+
+    # Dividing summation by cn_max (can do as cn_max is a constant)	
+    return sum_cn_fnn / cn_max  
     
 def setup_metal_slab_for_general_coordination_number_calculation(lattice='fcc', element='Cu', a=3.6, facet=(1,1,1), site='ontop'):
 
@@ -62,6 +46,7 @@ def setup_metal_slab_for_general_coordination_number_calculation(lattice='fcc', 
     :param site: 'ontop', 'bridge'
     :return: gcn. Generalized coordination number
     """
+    from carmm.analyse.neighbours import first_nearest_neighbours_list
     from ase.build import surface, bulk
     import numpy as np
 
@@ -113,7 +98,7 @@ def setup_metal_slab_for_general_coordination_number_calculation(lattice='fcc', 
 
     # Shift the indices to the centre of the surface to bulk interior
     innersiteIndices = [siteIndices[0]-9*toplayerSize]
-    cn, fnn = coord_number(slab, innersiteIndices)
+    fnn = first_nearest_neighbours_list(slab, innersiteIndices)
     cn_max = len(flatten_list_and_make_unique(fnn))
     print('CN-max ', cn_max)
 
@@ -124,39 +109,28 @@ def setup_metal_slab_for_general_coordination_number_calculation(lattice='fcc', 
     # we should separate the setup from the calculation, so a user can manipulate
     #return generalised_coordination_number(slab, siteIndices, cn_max)
 
-
-def generalised_coordination_number(slab, site_index, cn_max): 
-
-    """
-    Calculator for the generalised coordination number of an atom on a surface. 
-    Can work for _any_ system but one must know the bulk coordination number for a given species.    
  
-    See:
-      Calle-Vallejo, F. (2023). Advanced Science, 10(20), 2207644. https://doi.org/10.1002/ADVS.202207644
-      Zhao, Z., et al. (2016). Journal of Physical Chemistry C, 120(49), 28125–28130. https://doi.org/10.1021/ACS.JPCC.6B10155/
+def flatten_list_and_make_unique(list_of_lists):
+    """
+    This converts a list of lists into a flatten 1D list of integers with unique values
+    TODO: Generalise and move to utils
 
     Parameters:
-    
-    slab: ASE atoms object
-        Representation of the surface for consideration
-    site_index: Integer
-        The site of interest for which GCN should be calculated
-    cn_max: Integer
-        The maximum coordination number for the species being considered
-    TODO: Could this also be considered a string, with values stored for common entries (FCC, BCC, etc.)?
 
+    list_of_lists: List of integer lists 
+        Contains the first-nearest neighbours for each atom
     Returns:
-      - Float value of the generalised coordination number
-
+        - A flattened and unique 1D list of all possible second neighbours (neighbours of first neighbours)    
+ 
     """
-
-    # Calculate first nearest neighbours, and their coordination
-    _, first_nearest_neighbours = coord_number(slab, site_index)
-    fnn_flattened = flatten_list_and_make_unique(first_nearest_neighbours)
-    coordination_of_fnn, _ = coord_number(slab, fnn_flattened)
-
-    # Dividing summation by cn_max (can do as cn_max is a constant)	
-    gcn = sum(coordination_of_fnn) / cn_max  
     
-    return gcn
+    all_values = []
+    for list in list_of_lists:
+        all_values += list
+    
+    # Demonstration how to do the above in one line - saving for referece
+    # all_values = [value for list in list_of_lists for value in list]
 
+    # Make the list unique
+    return set(all_values)
+    
