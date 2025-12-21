@@ -62,20 +62,25 @@ def setup_metal_slab_for_general_coordination_number_calculation(lattice='fcc', 
     """
     from carmm.analyse.neighbours import first_nearest_neighbours_list
     from ase.build import surface, bulk
+    # from ase.neighborlist import natural_cutoffs
     import numpy as np
 
     sum_fnn_cn = 0 # The sum of CN of fnn
-    
+
     if lattice == 'fcc':
         bond = round(a / 2 ** 0.5, 3)
     elif lattice == 'bcc':
         bond = round(a * (3 ** 0.5) / 2, 3)
-    
-    if lattice not in ['fcc', 'bcc']:
+    else:
         print('Only support fcc and bcc for now')
         raise KeyError('Generalised coordination number is only supported for FCC and BCC lattice')
 
+    print(bond)
+
     metalbulk = bulk(element, lattice, a=a, cubic=True)
+    # cutoffs = natural_cutoffs(metalbulk)
+    # bond = 2*(sum(cutoffs)/len(cutoffs))
+    # print(bond)
     slab = surface(metalbulk, facet, layers=20, vacuum=20)
      
     size = len(slab)
