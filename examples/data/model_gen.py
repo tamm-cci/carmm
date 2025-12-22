@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-def get_example_slab(adsorbate=False, type="CO2", surface="111"):
+def get_example_slab(adsorbate=False, type="CO2", surface="111", thickness=2):
     '''
     Example model generation to show tool functionality
     Parameters:
@@ -20,7 +20,7 @@ def get_example_slab(adsorbate=False, type="CO2", surface="111"):
     element='Au'
     lattice_parameter=2.939
     width=3
-    depth=2
+    depth=thickness
     vacuum=10.0
 
     # Create surface

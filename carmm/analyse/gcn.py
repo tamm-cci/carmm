@@ -14,9 +14,11 @@ def generalised_coordination_number(slab, site_index, cn_max):
         Representation of the surface for consideration
     site_index: Integer
         The site of interest for which GCN should be calculated
-    cn_max: Integer
-        The maximum coordination number for the species being considered
-    TODO: Could this also be considered a string, with values stored for common entries (FCC, BCC, etc.)?
+    cn_max: String or Integer
+        The crystal structure of the lattice (so value taken from stored information) or 
+        the maximum coordination number for the species being considered.
+
+        Accepted string values are: SC, BCC, FCC and HCP.
 
     Returns:
       - Float value of the generalised coordination number
@@ -24,6 +26,18 @@ def generalised_coordination_number(slab, site_index, cn_max):
     """
 
     from carmm.analyse.neighbours import first_nearest_neighbours_list
+
+    # Manage the definition of cn_max; if string convert to int
+    if isinstance(cn_max, str):
+        if cn_max.lower() == "sc":
+            cn_max = 6
+        elif cn_max.lower() == "bcc":
+            cn_max = 8
+        elif cn_max.lower() == "fcc" or cn_max.lower() == "hcp":
+            cn_max = 12
+        else:
+            print(cn_max, "is not recognised. Please just give the bulk coordination number as an integer.")
+            raise ValueError('Tabulated coordination numers only exist for simple cubic, BCC, FCC, and HCP.') 
 
     # Calculate first nearest neighbours, and their coordination
     first_nearest_neighbours = first_nearest_neighbours_list(slab, site_index)
@@ -34,100 +48,6 @@ def generalised_coordination_number(slab, site_index, cn_max):
 
     # Dividing summation by cn_max (can do as cn_max is a constant)	
     return sum_cn_fnn / cn_max  
-    
-def setup_metal_slab_for_general_coordination_number_calculation(lattice='fcc', element='Cu', a=3.6, facet=(1,1,1), site='ontop'):
-
-    """
-    This routine will setup a model system for application of the GCN calculator.
-    It is note a requirement to use this setup function to use the GCN calculator, as you may know the values needed.
-    TODO: Find a better home for this. Maybe in build?   
-
-    Parameters:
-
-    lattice: string
-        The crystal structure of the system to be setup. Only fcc and bcc are accepted
-    element: string
-        The element to be used to build the model system
-    a: float
-        The lattice parameter for the model system
-    facet: tuple of integers, e.g. (1,1,1)
-        The crystal facet to be considered for the model system
-    site: string
-        String definition of adsorption site on surface, as per ASE definitions
-    Returns:
-        - An ASE atoms object representing the surface facet
-        - A list of indices that are to be considered the coordination site in this system
-        - The bulk coordination number of such a model system
-
-    """
-    from carmm.analyse.neighbours import first_nearest_neighbours_list
-    from ase.build import surface, bulk
-    # from ase.neighborlist import natural_cutoffs
-    import numpy as np
-
-    sum_fnn_cn = 0 # The sum of CN of fnn
-
-    if lattice == 'fcc':
-        bond = round(a / 2 ** 0.5, 3)
-    elif lattice == 'bcc':
-        bond = round(a * (3 ** 0.5) / 2, 3)
-    else:
-        print('Only support fcc and bcc for now')
-        raise KeyError('Generalised coordination number is only supported for FCC and BCC lattice')
-
-    print(bond)
-
-    metalbulk = bulk(element, lattice, a=a, cubic=True)
-    # cutoffs = natural_cutoffs(metalbulk)
-    # bond = 2*(sum(cutoffs)/len(cutoffs))
-    # print(bond)
-    slab = surface(metalbulk, facet, layers=20, vacuum=20)
-     
-    size = len(slab)
-    maxZ = np.max([atom.z for atom in slab])
-
-    lastIndex = 0 # Surface atom at the top right corner
-    toplayerIndices = [atom.index for atom in slab if atom.z == maxZ]
-    toplayerSize = len(toplayerIndices)
-    
-    x=0
-    y=0
-    for index in toplayerIndices:
-        if slab[index].x > x and slab[index].y > y:
-            x = slab[index].x
-            y = slab[index].y
-            lastIndex = index
-    
-    # FCC cn_max = 12
-    
-    if site == 'ontop':
-        siteIndices = [lastIndex+5*size,]
-    elif site == 'bridge':
-        # Shift the indices to the centre of the surface
-        topfnn = [atom.index for atom in slab 
-                  if atom.z == maxZ and 
-                  slab.get_distance(atom.index, lastIndex) <= bond+0.001 
-                  and slab.get_distance(atom.index, lastIndex) >= bond-0.001]
-        
-        siteIndices = [lastIndex+5*size, topfnn[0]+5*size]
-
-    slab = slab.repeat((4,4,1))
-
-    print('last index ', lastIndex, 'site indices', siteIndices)
-
-    # Shift the indices to the centre of the surface to bulk interior
-    innersiteIndices = [siteIndices[0]-9*toplayerSize]
-    fnn = first_nearest_neighbours_list(slab, innersiteIndices)
-    cn_max = len(flatten_list_and_make_unique(fnn))
-    print('CN-max ', cn_max)
-
-    # Return important variables for next calculation
-    return slab, siteIndices, cn_max
-
-    # Would be used if we wanted to connect straight into calculation ... but ...
-    # we should separate the setup from the calculation, so a user can manipulate
-    #return generalised_coordination_number(slab, siteIndices, cn_max)
-
  
 def flatten_list_and_make_unique(list_of_lists):
     """
