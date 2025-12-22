@@ -14,7 +14,9 @@ def test_gcn():
     slab_thicker = get_example_slab(adsorbate=False, thickness=3)
     gcn = generalised_coordination_number(slab_thicker, [1], 12)
     assert gcn == 7.5
-   
+
+    # A note these calculations below are not physically valid, except for the "FCC" case.
+    # The rest are just there to completely test the code functionality.   
     for lattice in ['sc', 'bcc', 'fcc', 'hcp']:
         gcn = generalised_coordination_number(slab_thicker, [1], lattice)
         if lattice == 'sc':
