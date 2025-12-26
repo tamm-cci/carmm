@@ -21,7 +21,6 @@ def get_color(sym):
 
 def clear_scene():
     import bpy
-    from ase.io import read
     bpy.ops.object.select_all(action='SELECT')
     bpy.ops.object.delete()
 
