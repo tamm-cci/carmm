@@ -140,3 +140,24 @@ def make_cell(cell):
     cell_obj.show_wire = True
 
     return cell_obj
+
+def make_frames_from_traj(traj_file_name):
+    import bpy
+    from ase.io import read
+    traj = read(traj_file_name, index=":")
+    nframes = len(traj)
+
+    bpy.context.scene.frame_start = 1
+    bpy.context.scene.frame_end = nframes
+
+    atoms0 = traj[0]
+    atom_objects = create_structure_in_viewport(atoms0)
+
+
+    for frame, atoms in enumerate(traj, start=1):
+        bpy.context.scene.frame_set(frame)
+        positions = atoms.get_positions()
+
+        for i, obj in enumerate(atom_objects):
+            obj.location = positions[i]
+            obj.keyframe_insert(data_path="location", frame=frame)
