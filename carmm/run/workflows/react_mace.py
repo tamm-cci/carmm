@@ -212,7 +212,7 @@ class ReactMACE:
             Transition state geometry structure
         """
 
-        from ase.neb import NEB
+        from ase.mep import NEB
         from ase.optimize import FIRE
         from carmm.analyse.forces import is_converged
         import os
