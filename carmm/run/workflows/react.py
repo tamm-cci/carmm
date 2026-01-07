@@ -509,8 +509,10 @@ class ReactAims:
 
                     os.chdir(subdirectory_name)
 
-                    """Setup the Catlearn object for MLNEB"""
-                    neb_catlearn = MLNEB(start=initial,
+                    # Code split for different ASE versions                   
+                    if not ase_env_check('3.27.0'):
+                        """Setup the Catlearn object for MLNEB"""
+                        neb_catlearn = MLNEB(start=initial,
                                          end=final,
                                          ase_calc=calculator,
                                          n_images=n,
@@ -519,6 +521,19 @@ class ReactAims:
                                          prev_calculations=self.prev_calcs,
                                          mic=True,
                                          restart=restart)
+                    else:
+                        # Running a vanilla NEB calculation. Need a starting path for NEB
+                        images = [initial] 
+                        images += [initial.copy() for i in range(n)]
+                        images += [final]
+                        
+                        neb_catlearn = MLNEB(images)
+                        neb_catlearn.interpolate(method=self.interpolation, 
+                                         mic=True)
+
+                        for image in images[1:-2]:
+                            image.calc=calculator 
+                     
                     if not self.dry_run:
                         """Run the NEB optimisation. Adjust fmax to desired convergence criteria, usually 0.05 eV/A"""
                         neb_catlearn.run(fmax=fmax,
