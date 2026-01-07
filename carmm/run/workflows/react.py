@@ -200,8 +200,7 @@ class ReactAims:
                     traj_name = f"{subdirectory_name}/{str(counter)}_{self.filename}_{str(opt_restarts)}.traj"
 
                     if relax_unit_cell:
-                        from carmm.utils.python_env_check import ase_env_check
-                        if not ase_env_check:
+                        if not ase_env_check():
                             # Legacy, ASE Version < 3.23
                             from ase.constraints import StrainFilter
                         else:
@@ -386,7 +385,6 @@ class ReactAims:
             Transition state geometry structure
         """
 
-        from carmm.utils.python_env_check import ase_env_check
         if not ase_env_check('3.27.0'):
             # Sadly this is dead code. Needs removing
             from catlearn.optimize.mlneb import MLNEB

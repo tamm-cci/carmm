@@ -23,7 +23,7 @@ def check_interpolation(initial, final, n_max, interpolation="linear", verbose=T
     '''
 
     from carmm.utils.python_env_check import ase_env_check
-    if not ase_env_check:
+    if not ase_env_check():
         # Legacy, ASE Version < 3.23
         from ase.neb import NEB
     else:
