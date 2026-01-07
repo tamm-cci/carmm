@@ -151,7 +151,7 @@ class ReactMACE:
                 traj_name = f"{subdirectory_name}/{str(counter)}_{self.filename}_{str(opt_restarts)}.traj"
 
                 if relax_unit_cell:
-                    from ase.constraints import StrainFilter
+                    from ase.filters import StrainFilter
                     unit_cell_relaxer = StrainFilter(self.initial)
                     opt = optimiser(unit_cell_relaxer, trajectory=traj_name, **opt_kwargs)
                 else:
