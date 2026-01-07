@@ -200,7 +200,12 @@ class ReactAims:
                     traj_name = f"{subdirectory_name}/{str(counter)}_{self.filename}_{str(opt_restarts)}.traj"
 
                     if relax_unit_cell:
-                        from ase.filters import StrainFilter
+                        from carmm.utils.python_env_check import ase_env_check
+                        if not ase_env_check:
+                            # Legacy, ASE Version < 3.23
+                            from ase.constraints import StrainFilter
+                        else:
+                            from ase.filters import StrainFilter
                         unit_cell_relaxer = StrainFilter(self.initial)
                         opt = optimiser(unit_cell_relaxer, trajectory=traj_name, **opt_kwargs)
                     else:
