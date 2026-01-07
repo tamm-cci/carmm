@@ -381,7 +381,14 @@ class ReactAims:
             Transition state geometry structure
         """
 
-        from catlearn.optimize.mlneb import MLNEB
+        from carmm.utils.python_env_check import ase_env_check
+        if not ase_env_check('3.27.0'):
+            # Sadly this is dead code. Needs removing
+            from catlearn.optimize.mlneb import MLNEB
+        else:
+            # Hacked import so the code still runs
+            from ase.mep import NEB as MLNEB
+
         from ase.io import write
 
         #TODO: calling mlneb.run() generates files in the current directory, reverting to os.chdir() necessary
