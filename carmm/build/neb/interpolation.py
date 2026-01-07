@@ -22,7 +22,7 @@ def check_interpolation(initial, final, n_max, interpolation="linear", verbose=T
         Whether to save the trajectory for transfer on to an NEB calculation
     '''
 
-    from ase.neb import NEB
+    from ase.mep import NEB
     from carmm.analyse.bonds import search_abnormal_bonds
     from ase.io.trajectory import Trajectory
     from ase.io import read
