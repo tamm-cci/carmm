@@ -60,6 +60,14 @@ carmm.analyse.forces module
    :undoc-members:
    :show-inheritance:
 
+carmm.analyse.gcn module
+------------------------
+
+.. automodule:: carmm.analyse.gcn
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 carmm.analyse.graphs module
 ---------------------------
 

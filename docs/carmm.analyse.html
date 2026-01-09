@@ -531,6 +531,60 @@ fmax: float</p>
 </dd></dl>
 
 </section>
+<section id="module-carmm.analyse.gcn">
+<span id="carmm-analyse-gcn-module"></span><h2>carmm.analyse.gcn module<a class="headerlink" href="#module-carmm.analyse.gcn" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="carmm.analyse.gcn.flatten_list_and_make_unique">
+<span class="sig-prename descclassname"><span class="pre">carmm.analyse.gcn.</span></span><span class="sig-name descname"><span class="pre">flatten_list_and_make_unique</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_of_lists</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#carmm.analyse.gcn.flatten_list_and_make_unique" title="Link to this definition">¶</a></dt>
+<dd><p>This converts a list of lists into a flatten 1D list of integers with unique values
+TODO: Generalise and move to utils</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>list_of_lists: List of integer lists</dt><dd><p>Contains the first-nearest neighbours for each atom</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>A flattened and unique 1D list of all possible second neighbours (neighbours of first neighbours)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="carmm.analyse.gcn.generalised_coordination_number">
+<span class="sig-prename descclassname"><span class="pre">carmm.analyse.gcn.</span></span><span class="sig-name descname"><span class="pre">generalised_coordination_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slab</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_max</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#carmm.analyse.gcn.generalised_coordination_number" title="Link to this definition">¶</a></dt>
+<dd><p>Calculator for the generalised coordination number of an atom on a surface.
+Can work for _any_ system but one must know the bulk coordination number for a given species.</p>
+<dl class="simple">
+<dt>See:</dt><dd><p>Calle-Vallejo, F. (2023). Advanced Science, 10(20), 2207644. <a class="reference external" href="https://doi.org/10.1002/ADVS.202207644">https://doi.org/10.1002/ADVS.202207644</a>
+Zhao, Z., et al. (2016). Journal of Physical Chemistry C, 120(49), 28125–28130. <a class="reference external" href="https://doi.org/10.1021/ACS.JPCC.6B10155/">https://doi.org/10.1021/ACS.JPCC.6B10155/</a></p>
+</dd>
+</dl>
+<p>Parameters:</p>
+<dl>
+<dt>slab: ASE atoms object</dt><dd><p>Representation of the surface for consideration</p>
+</dd>
+<dt>site_index: Integer</dt><dd><p>The site of interest for which GCN should be calculated</p>
+</dd>
+<dt>cn_max: String or Integer</dt><dd><p>The crystal structure of the lattice (so value taken from stored information) or
+the maximum coordination number for the species being considered.</p>
+<p>Accepted string values are: SC, BCC, FCC and HCP.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>Float value of the generalised coordination number</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="module-carmm.analyse.graphs">
 <span id="carmm-analyse-graphs-module"></span><h2>carmm.analyse.graphs module<a class="headerlink" href="#module-carmm.analyse.graphs" title="Link to this heading">¶</a></h2>
 <dl class="py function">
@@ -987,6 +1041,27 @@ fname: String</p>
 </section>
 <section id="module-carmm.analyse.neighbours">
 <span id="carmm-analyse-neighbours-module"></span><h2>carmm.analyse.neighbours module<a class="headerlink" href="#module-carmm.analyse.neighbours" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="carmm.analyse.neighbours.first_nearest_neighbours_list">
+<span class="sig-prename descclassname"><span class="pre">carmm.analyse.neighbours.</span></span><span class="sig-name descname"><span class="pre">first_nearest_neighbours_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#carmm.analyse.neighbours.first_nearest_neighbours_list" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the neighbouring atoms for any given atom or list of atoms</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>atoms: An ASE atoms object</dt><dd><p>The object to be interrogated</p>
+</dd>
+<dt>site_indices:</dt><dd><p>A list of index values for which the coordination number must be calculated</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>A list of neighbours for each interrogated species</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="carmm.analyse.neighbours.neighbours">
 <span class="sig-prename descclassname"><span class="pre">carmm.analyse.neighbours.</span></span><span class="sig-name descname"><span class="pre">neighbours</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centre</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#carmm.analyse.neighbours.neighbours" title="Link to this definition">¶</a></dt>
