@@ -3,10 +3,17 @@ import os
 
 class TinyDFTDB():
 
-    def __init__(self, dbdir="./", PID=None):
+    def __init__(self, dbdir="./", PID=None, save_structure=True, struct_dir=None, human_readable_hash=True):
 
         self.db_pid = PID
         self.dbdir = dbdir
+        self.human_readable_hash = human_readable_hash
+        self.save_structure = save_structure
+
+        if struct_dir is None:
+            self.struct_dir = f"{self.dbdir}/{self.db_pid}_STRUCTURES"
+        else:
+            self.struct_dir = struct_dir
 
         if any(self.db_pid) is None:
             raise Exception("Project ID must be specified")
@@ -14,11 +21,12 @@ class TinyDFTDB():
         self.db = TinyDB(f'{self.dbdir}/{self.db_pid}.json')
 
     def insert_calc_start_dataline(self, platform, EID, DID, CID, **kwargs):
+        
         self.table = self.db.table(EID)
         self.table.document_id_class = str
 
         meta_data = self.generate_metadata(platform, EID, DID, CID, **kwargs)
-        self.init_dict = meta_data | {"input_parameters": self.generate_calulcation_inputs(**kwargs)}
+        self.init_dict = meta_data | {"InputParameters": self.generate_calulcation_inputs(**kwargs)} | {"TimingData" : self.timing_data}
 
         self.table = self.db.table(EID)
 
@@ -27,11 +35,31 @@ class TinyDFTDB():
         self.insert_dataline(self.init_dict)
 
     def insert_calc_end_dataline(self, calc_success=True, **kwargs):
+        import datetime
+        import os
+        from ase.io import write
 
         if calc_success:
-            self.init_dict["CalculationStatus"] = "Success"
+            self.init_dict["CalculationStatus"] = "Success"            
         else:
             self.init_dict["CalculationStatus"] = "Failed"
+
+        self.end_datetime = datetime.datetime.now()
+        self.init_dict["TimingData"]["EndDate"] = self.end_datetime.strftime("%d%m%y")
+        self.init_dict["TimingData"]["EndTime"] = self.end_datetime.strftime("%X")
+        delta_calc = self.end_datetime - self.start_datetime
+        self.init_dict["TimingData"]["ElapsedTime"] = delta_calc.total_seconds()
+
+        atom_keys = []
+        for key, val in kwargs.items():
+            if type(val).__name__ == "Atoms":
+                atom_keys.append(key)
+                if (self.save_structure):
+                    os.makedirs(self.struct_dir, exist_ok=True)
+                    write(f"{self.struct_dir}/FINAL_{self.uid_hash}.traj", val)
+
+        for key in atom_keys:
+            _ = kwargs.pop(key)
 
         if len(kwargs) > 0:
             self.final_dict = self.init_dict | {"CalculationOutput": kwargs}
@@ -46,8 +74,11 @@ class TinyDFTDB():
     def generate_uid(self, EID, DID, CID):
         from hashlib import sha256
 
-        uid_str = "".join([self.db_pid, EID, DID, CID]).encode('UTF-8')
-        uid_hash = sha256(uid_str).hexdigest()
+        if self.human_readable_hash:
+            uid_hash = "_".join([self.db_pid, EID, DID, CID])
+        else:
+            uid_str = "".join([self.db_pid, EID, DID, CID]).encode('UTF-8')
+            uid_hash = sha256(uid_str).hexdigest()
 
         return uid_hash
 
@@ -55,41 +86,46 @@ class TinyDFTDB():
         import datetime
 
         data_entry = {}
+
         # Define metadata
         metadata = {}
         metadata["PID"] = self.db_pid
-        metadata["EID"] = EID
-        metadata["DID"] = DID
-        metadata["CID"] = CID
+        self.EID = EID
+        self.DID = DID
+        self.CID = CID
+        metadata["EID"] = self.EID
+        metadata["DID"] = self.DID
+        metadata["CID"] = self.CID
 
-        curr_datetime = datetime.datetime.now()
+        self.start_datetime = datetime.datetime.now()
+        self.timing_data = {}
+        self.timing_data["StartDate"] = self.start_datetime.strftime("%d%m%y")
+        self.timing_data["StartTime"] = self.start_datetime.strftime("%X")
 
-        metadata["Date"] = curr_datetime.strftime("%d%m%y")
-        metadata["StartTime"] = curr_datetime.strftime("%X")
-
-        data_entry["metadata"]  = metadata
+        data_entry["Metadata"]  = metadata
 
         # HPC metadata - we're going to make a wild assumption that
         # anything that isn't a desktop is a SLURM based HPC
-        if platform != "desktop":
-            hpc_data_names = ["Platform", "JobStatus", "JOB_ID", "SUBMIT_DIR", "NODELIST", "NTASKS", "NTASKSPERNODE"]
-            hpc_data_entries = {}
-            hpc_data_entries[hpc_data_names[0]] = platform
-            hpc_data_entries[hpc_data_names[1]] = os.environ["SLURM_JOB_ID"]
-            hpc_data_entries[hpc_data_names[2]] = os.environ["SLURM_SUBMIT_DIR"]
-            hpc_data_entries[hpc_data_names[3]] = os.environ["SLURM_JOB_NODELIST"]
-            hpc_data_entries[hpc_data_names[4]] = os.environ["SLURM_NTASKS"]
-            hpc_data_entries[hpc_data_names[5]] = os.environ["SLURM_NTASKS_PER_NODE"]
+        hpc_data_names = ["Platform", "SLURM_JOB_ID", "SLURM_SUBMIT_DIR", "SLURM_JOB_NODELIST", "SLURM_NTASKS", "SLURM_NTASKS_PER_NODE"]
+        hpc_data_entries = {}
 
-            data_entry["hpc_metadata"] = hpc_data_entries
+        hpc_data_entries["Platform"] = platform
+        for name in hpc_data_names[1:]:
+            if name in os.environ:
+                hpc_data_entries[name] = os.environ[name]
+
+        data_entry["HPCMetadata"] = hpc_data_entries
 
         self.uid_hash = self.generate_uid(EID, DID, CID)
 
         return data_entry
 
     def generate_calulcation_inputs(self, **kwargs):
+        import os
+        from ase.io import write
 
-        print(kwargs.values())
+        from ase.calculators.aims import Aims, AimsProfile
+        from ase.calculators.genericfileio import GenericFileIOCalculator
 
         input_param_dict = {}
 
@@ -102,10 +138,12 @@ class TinyDFTDB():
 
                 if type(val).__name__ == "Atoms":
                     at_dict = {}
-                    at_dict = at_dict | {"formula" : val.get_chemical_formula()}
-                    at_dict = at_dict | {"natoms" : len(val)}
+                    at_dict = at_dict | {"Formula" : val.get_chemical_formula()}
+                    at_dict = at_dict | {"NAtoms" : len(val)}
                     input_param_dict[key] = at_dict
-
+                    if self.save_structure:
+                        os.makedirs(self.struct_dir, exist_ok=True)
+                        write(f"{self.struct_dir}/INIT_{self.uid_hash}.traj", val)
             else:
                 input_param_dict[key] = val
 
