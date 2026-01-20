@@ -116,7 +116,7 @@ def _get_cpu_command(hpc, nodes_per_instance=None):
         "hawk": { "cpus_per_node": 40, "cpu_command": f"--nodes=$SLURM_NNODES --ntasks=$SLURM_NTASKS -d mpirun", },
         "hawk-amd": { "cpus_per_node": 64, "cpu_command": f"--nodes=$SLURM_NNODES --ntasks=$SLURM_NTASKS -d mpirun", },
         # Untested, taken from Hawk
-        "falcon": { "cpus_per_node": 192, "cpu_command": f"", },
+        "falcon": { "cpus_per_node": 192, "cpu_command": "", },
         "isambard": { "cpus_per_node": 64, "cpu_command": f"-n $NPROCS", },
         "isambard3": { "cpus_per_node": 144, "cpu_command": "", },
         "young": { "cpus_per_node": 64, "cpu_command": "", },
