@@ -12,7 +12,7 @@ def test_run_aims():
     expected_paths = {
         'hawk':       'time srun --nodes=$SLURM_NNODES --ntasks=$SLURM_NTASKS -d mpirun /apps/local/projects/scw1057/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x',
         'hawk-amd':   'time srun --nodes=$SLURM_NNODES --ntasks=$SLURM_NTASKS -d mpirun /apps/local/projects/scw1057/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x',
-        'falcon':     'time mpiruni /shared/home2/app_shared/SCWF00007/software/fhi-aims/release/$VERSION/bin/aims.$VERSION.scalapack.mpi.x',
+        'falcon':     'time mpirun /shared/home2/app_shared/SCWF00007/software/fhi-aims/release/$VERSION/bin/aims.$VERSION.scalapack.mpi.x',
         'isambard':   'time aprun -n $NPROCS /home/ca-alogsdail/fhi-aims-gnu/bin/aims.$VERSION.scalapack.mpi.x',
         'isambard3' : 'time srun  /projects/c5b/software/fhi-aims/release/$VERSION/bin/aims.$VERSION.scalapack.mpi.x',
         'archer2':    'srun --cpu-bind=cores --distribution=block:block --hint=nomultithread  /work/e05/e05-files-log/shared/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x',
