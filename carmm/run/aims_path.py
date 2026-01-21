@@ -42,7 +42,7 @@ def set_aims_command(hpc='hawk', basis_set='light', defaults=2010, nodes_per_ins
     preamble = {
         "hawk": "time srun",
         "hawk-amd": "time srun",
-        "falcon": "time mpirun",
+        "falcon": "time mpirun", 
         "isambard": "time aprun",
         "isambard3": "time srun",
         "archer2": "srun --cpu-bind=cores --distribution=block:block --hint=nomultithread",
