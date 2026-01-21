@@ -53,23 +53,24 @@ def set_aims_command(hpc='hawk', basis_set='light', defaults=2010, nodes_per_ins
 
     assert hpc in preamble, "Inappropriate HPC facility: " + hpc + "is not recognised."
 
+    assert "VERSION" in os.environ, \
+            "The executable VERSION must be defined as an environment variable before running."
+    fhi_aims_version = os.environ['VERSION']
+
     fhi_aims_directory = {
         "hawk": "/apps/local/projects/scw1057/software/fhi-aims/",
         "hawk-amd": "/apps/local/projects/scw1057/software/fhi-aims/",
         # It isn't very satisfying that this is tied to a version. To be resolved.
-        "falcon": "/shared/home2/app_shared/SCWF00007/software/fhi-aims/release/250822/",
+        "falcon": "/shared/home2/app_shared/SCWF00007/software/fhi-aims/release/" + fhi_aims_version + "/",
         "isambard": "/home/ca-alogsdail/fhi-aims-gnu/",
-        "isambard3": "/projects/c5b/software/fhi-aims/release/250822/",
+        "isambard3": "/projects/c5b/software/fhi-aims/release/" + fhi_aims_version + "/",
         "archer2": "/work/e05/e05-files-log/shared/software/fhi-aims/",
         "young": "/home/mmm0170/Software/fhi-aims/",
         "aws": "/shared/logsdail_group/sing/",
         "custom": custom_root_dir
     }
 
-    assert "VERSION" in os.environ, \
-            "The executable VERSION must be defined as an environment variable before running."
-
-    executable_d = {"compiled": "bin/aims."+os.environ["VERSION"]+".scalapack.mpi.x",
+    executable_d = {"compiled": "bin/aims."+fhi_aims_version+".scalapack.mpi.x",
                     "apptainer": "apptainer exec " + fhi_aims_directory["aws"] + "mkl_aims_2.sif bash " + \
                                  fhi_aims_directory["aws"] + "sing_fhiaims_script.sh $@"
                     }
