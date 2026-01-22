@@ -55,9 +55,9 @@ def neighbours(atoms, centre, shell, cutoff=None, verbose=False):
             for shell in range(len(shell_list)):
                 print("Shell", shell, "contains atoms with indices:", shell_list[shell])
 
-        all_neighbours = list(all_neighbours)
-        atoms_copy = atoms.copy()
-        selection = atoms_copy[all_neighbours]
+    all_neighbours = list(all_neighbours)
+    atoms_copy = atoms.copy()
+    selection = atoms_copy[all_neighbours]
 
     return all_neighbours, shell_list, selection
 
