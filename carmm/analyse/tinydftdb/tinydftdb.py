@@ -1,10 +1,11 @@
 from tinydb import TinyDB, Query, table
+from contextlib import contextmanager
 import os
 
 class TinyDFTDB():
 
     def __init__(self, dbdir="./", PID=None, save_structure=True, struct_dir=None, human_readable_hash=True):
-
+        
         self.db_pid = PID
         self.dbdir = dbdir
         self.human_readable_hash = human_readable_hash
@@ -18,22 +19,17 @@ class TinyDFTDB():
         if any(self.db_pid) is None:
             raise Exception("Project ID must be specified")
 
-        self.db = TinyDB(f'{self.dbdir}/{self.db_pid}.json')
+        self.json_filname = f"{self.dbdir}/{self.db_pid}.json"
+        self.json_lock_filname = f"{self.dbdir}/{self.db_pid}.json.lock"
 
-    def insert_calc_start_dataline(self, platform, EID, DID, CID, **kwargs):
-        
-        self.table = self.db.table(EID)
-        self.table.document_id_class = str
-
-        meta_data = self.generate_metadata(platform, EID, DID, CID, **kwargs)
-        self.init_dict = meta_data | {"InputParameters": self.generate_calulcation_inputs(**kwargs)} | {"TimingData" : self.timing_data}
-
-        self.table = self.db.table(EID)
-
+    def insert_calc_start_dataline(self, platform, EID, SID, DID, CID, **kwargs):
+        meta_data = self.generate_metadata(platform, EID, SID, DID, CID, **kwargs)
+        calc_inputs = self.generate_calculation_inputs(**kwargs)
+        self.init_dict = meta_data | {"InputParameters": calc_inputs} | {"TimingData" : self.timing_data}
         self.init_dict["CalculationStatus"] = "In Progress"
 
-        self.insert_dataline(self.init_dict)
-
+        self.insert_dataline(EID, self.init_dict)
+            
     def insert_calc_end_dataline(self, calc_success=True, **kwargs):
         import datetime
         import os
@@ -66,23 +62,34 @@ class TinyDFTDB():
         else:
             self.final_dict = self.init_dict
             
-        self.insert_dataline(self.final_dict)
+        self.insert_dataline(self.EID, self.final_dict)
 
-    def insert_dataline(self, data):
-        self.table.upsert(table.Document(data, doc_id=self.uid_hash))
+    def insert_dataline(self, table_id, data):
+        import portalocker
+
+        try:
+            with portalocker.Lock(self.json_lock_filname, timeout=60):            
+                db = TinyDB(self.json_filname)
+                table_new = db.table(table_id)
+                table_new.document_id_class = str
+
+                table_new.upsert(table.Document(data, doc_id=self.uid_hash))
+                db.close()
+        except:
+            raise Exception("Something went wrong while writing dataline...")
         
-    def generate_uid(self, EID, DID, CID):
+    def generate_uid(self, EID, SID, DID, CID):
         from hashlib import sha256
 
         if self.human_readable_hash:
-            uid_hash = "_".join([self.db_pid, EID, DID, CID])
+            uid_hash = "_".join([self.db_pid, EID, SID, DID, CID])
         else:
-            uid_str = "".join([self.db_pid, EID, DID, CID]).encode('UTF-8')
+            uid_str = "".join([self.db_pid, EID, SID, DID, CID]).encode('UTF-8')
             uid_hash = sha256(uid_str).hexdigest()
 
         return uid_hash
 
-    def generate_metadata(self, platform, EID, DID, CID, **kwargs):
+    def generate_metadata(self, platform, EID, SID, DID, CID, **kwargs):
         import datetime
 
         data_entry = {}
@@ -91,6 +98,7 @@ class TinyDFTDB():
         metadata = {}
         metadata["PID"] = self.db_pid
         self.EID = EID
+        self.SID = SID
         self.DID = DID
         self.CID = CID
         metadata["EID"] = self.EID
@@ -116,11 +124,11 @@ class TinyDFTDB():
 
         data_entry["HPCMetadata"] = hpc_data_entries
 
-        self.uid_hash = self.generate_uid(EID, DID, CID)
+        self.uid_hash = self.generate_uid(EID, SID, DID, CID)
 
         return data_entry
 
-    def generate_calulcation_inputs(self, **kwargs):
+    def generate_calculation_inputs(self, **kwargs):
         import os
         from ase.io import write
 
@@ -129,13 +137,13 @@ class TinyDFTDB():
 
         input_param_dict = {}
 
+        print(f"kwargs: {kwargs}")
         for key, val in kwargs.items():
 
             if hasattr(val, "__class__"):
                 if issubclass(val.__class__, GenericFileIOCalculator):
                     input_param_dict[key] = val.parameters
                     input_param_dict[key] = input_param_dict[key] | {"calc_name":type(val).__name__}
-
                 if type(val).__name__ == "Atoms":
                     at_dict = {}
                     at_dict = at_dict | {"Formula" : val.get_chemical_formula()}
@@ -143,12 +151,13 @@ class TinyDFTDB():
                     input_param_dict[key] = at_dict
                     if self.save_structure:
                         os.makedirs(self.struct_dir, exist_ok=True)
-                        write(f"{self.struct_dir}/INIT_{self.uid_hash}.traj", val)
+                        write(f"{self.struct_dir}/INIT_{self.uid_hash}.traj", val, parallel=False)
             else:
                 input_param_dict[key] = val
 
-        return input_param_dict
+        print(f"input_param_dict: {input_param_dict}")
 
+        return input_param_dict
         
 if __name__ == "__main__":
 

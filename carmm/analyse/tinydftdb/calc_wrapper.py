@@ -12,11 +12,9 @@ class TinyDFTDBCalcWrapper():
         self.PID = PID
         self.db_dir = db_dir
 
-        self.dftdb = TinyDFTDB(PID=PID, save_structure=True)
-
-
     def init_dataline(self, EID, DID, CID, platform, **kwargs):
 
+        self.dftdb = TinyDFTDB(PID=self.PID, save_structure=True, dbdir=self.db_dir)
         self.dftdb.insert_calc_start_dataline(platform=platform,
                                              EID=EID,
                                              DID=DID,
@@ -38,13 +36,72 @@ class TinyDFTDBCalcWrapper():
             output_dict = self.calc_function(*args, **kwargs)
         except Exception as eee:
             curr_size, curr_peak = tracemalloc.get_traced_memory()
-            self.dftdb.insert_calc_end_dataline(calc_success=False, PeakMemoryMB=curr_peak/(1024*1024))
+            output_dict = {"PeakMemoryMB": curr_peak/(1024*1024)} | output_dict
+            self.dftdb.insert_calc_end_dataline(calc_success=False, **output_dict)
             print(f"Something has happened while running the calculation: {eee}\nAborting...")
             traceback.print_tb(eee.__traceback__, limit=5, file=sys.stdout)
+            self.close()
         else:
             curr_size, curr_peak = tracemalloc.get_traced_memory()
             output_dict = {"PeakMemoryMB": curr_peak/(1024*1024)} | output_dict
             self.dftdb.insert_calc_end_dataline(calc_success=True, **output_dict)
+            self.close()
+
+    def close(self):
+        self.dftdb.close()
+
+class TinyDFTDBCalcWrapper_HPC():
+
+    def __init__(self, PID, db_dir="./"):
+        from carmm.analyse.tinydftdb.tinydftdb import TinyDFTDB
+        from mpi4py import MPI
+
+        self.PID = PID
+        self.db_dir = db_dir
+
+        self.comm = MPI.COMM_WORLD
+        self.rank = self.comm.Get_rank()
+
+        if self.rank == 0:
+            self.is_root = True
+        else:
+            self.is_root = False
+
+    def init_dataline(self, EID, DID, CID, platform, **kwargs):
+
+        if self.is_root:
+            self.dftdb = TinyDFTDB(PID=self.PID, save_structure=True, dbdir=self.db_dir)
+            self.dftdb.insert_calc_start_dataline(platform=platform,
+                                                  EID=EID,
+                                                  DID=DID,
+                                                  CID=CID,
+                                                  **kwargs)
+
+    def set_calc_function(self, calc_function):
+        self.calc_function = calc_function
+
+
+    def run_calculation(self, *args, **kwargs):
+        import traceback
+        import tracemalloc
+        import sys
+
+        try:
+            tracemalloc.start()
+            output_dict = self.calc_function(*args, **kwargs)
+        except Exception as eee:
+            curr_size, curr_peak = tracemalloc.get_traced_memory()
+            if self.is_root:
+                self.dftdb.insert_calc_end_dataline(calc_success=False, PeakMemoryMB=curr_peak/(1024*1024))
+            print(f"Something has happened while running the calculation: {eee}\nAborting...")
+            traceback.print_tb(eee.__traceback__, limit=5, file=sys.stdout)
+            raise Exception("I am dying now. Goodbye!")
+        else:
+            curr_size, curr_peak = tracemalloc.get_traced_memory()
+            output_dict = {"PeakMemoryMB": curr_peak/(1024*1024)} | output_dict
+            if self.is_root:
+                self.dftdb.insert_calc_end_dataline(calc_success=True, **output_dict)
+
 
 if __name__ == "__main__":
     atoms1=Atoms("H2O")
