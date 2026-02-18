@@ -45,6 +45,8 @@ def get_aims_calculator(dimensions, relativistic=None, k_grid=None, xc="pbe", co
 
     if relativistic is None:
         parameter_dict['relativistic'] = ('atomic_zora', 'scalar')
+    else:
+        parameter_dict['relativistic'] = relativistic
 
     # Changing to check ASE version, as this determines behaviour of calculator
     from carmm.utils.python_env_check import ase_env_check
