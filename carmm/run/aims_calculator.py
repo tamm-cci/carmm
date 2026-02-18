@@ -1,6 +1,3 @@
-import os
-
-
 def get_aims_calculator(dimensions, relativistic=None, k_grid=None, xc="pbe", compute_forces=True, directory='./', **kwargs):
     '''
     Method to return a "default" FHI-aims calculator.
@@ -28,7 +25,8 @@ def get_aims_calculator(dimensions, relativistic=None, k_grid=None, xc="pbe", co
             FHI_calc: FHI-aims ASE calculator
        
     '''
-    from ase.calculators.aims import Aims    
+    from ase.calculators.aims import Aims   
+    import os 
 
     # Created dictionary to store arguments
     parameter_dict = {}
