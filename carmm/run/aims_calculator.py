@@ -1,7 +1,7 @@
 import os
 
 
-def get_aims_calculator(dimensions, spin=None, relativistic=None, k_grid=None, xc="pbe", compute_forces=True, directory='./', **kwargs):
+def get_aims_calculator(dimensions, relativistic=None, k_grid=None, xc="pbe", compute_forces=True, directory='./', **kwargs):
     '''
     Method to return a "default" FHI-aims calculator.
     Note: This file should not be changed without consultation,
@@ -11,8 +11,6 @@ def get_aims_calculator(dimensions, spin=None, relativistic=None, k_grid=None, x
 
         dimensions: Integer
             Determines whether we have a "gas"-phase (0) or "periodic" structure (2 or 3)
-        spin: String
-            Determines if spin is to be invoked for the calculation
         relativistic: String
             Determines what setting for relativity is to be used
         k_grid: List of integers
@@ -46,9 +44,6 @@ def get_aims_calculator(dimensions, spin=None, relativistic=None, k_grid=None, x
 
     if dimensions >= 2:
         parameter_dict['k_grid'] = k_grid
-
-    if spin is not None:
-        parameter_dict['spin'] = 'none'
 
     if relativistic is None:
         parameter_dict['relativistic'] = ('atomic_zora', 'scalar')
