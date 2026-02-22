@@ -50,6 +50,10 @@ def get_aims_calculator(dimensions, spin=None, relativistic=None, k_grid=None, x
     if spin is not None:
         parameter_dict['spin'] = 'none'
 
+    # This flag is set as a default in FHI-aims since Nov 2023 (builds labelled 2311XX)
+    # This means the flag setting here is not necessary for new builds _but_ remains necessary
+    # for anyone using CARMM with FHI-aims versions pre-2311XX, which includes Hawk builds.
+    # In the future, this default settings should be removed here so the code is easier to maintain.
     if relativistic is None:
         parameter_dict['relativistic'] = ('atomic_zora', 'scalar')
 
