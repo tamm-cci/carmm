@@ -43,6 +43,11 @@ def get_aims_calculator(dimensions, relativistic=None, k_grid=None, xc="pbe", co
     if dimensions >= 2:
         parameter_dict['k_grid'] = k_grid
 
+    # The relativity flag is set as a default to atomic_zora scalar in FHI-aims since Nov 2023 (builds labelled 2311XX)
+    # This means the flag setting here is not necessary for new builds _but_ remains necessary
+    # for anyone using CARMM with FHI-aims versions pre-2311XX, which includes Hawk builds.
+    # In the future, this default settings should be removed here so the code is easier to maintain.
+
     if relativistic is None:
         parameter_dict['relativistic'] = ('atomic_zora', 'scalar')
     else:
