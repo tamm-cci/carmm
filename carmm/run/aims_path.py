@@ -88,7 +88,7 @@ def set_aims_command(hpc='hawk', basis_set='light', defaults=2010, nodes_per_ins
             print("PMI library is set. Carry on.")
         else:
             os.environ["I_MPI_PMI_LIBRARY"] = "/usr/lib64/libpmi.so"
-            print(f"Set PMI library path to {os.environ["I_MPI_PMI_LIBRARY"]}")
+            print("Set PMI library path to ", os.environ["I_MPI_PMI_LIBRARY"])
 
 
         #Note: pointing manually to Slurm's PMI-1 or PMI-2 library is necessary for using srun with IPMI
