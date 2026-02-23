@@ -55,14 +55,15 @@ def test_run_aims():
         # fhi_calc = get_aims_calculator(state)
         sockets_calc, fhi_calc = get_aims_and_sockets_calculator(dimensions=state, verbose=True)
 
-        default_params = {'relativistic': ('atomic_zora', 'scalar'),
-                          'xc': 'pbe',
-                          'compute_forces': True,
-                          }
-        if state == 2:
-            default_params['use_dipole_correction'] = 'true'
-        if state >= 2:
-            default_params['k_grid'] = True
+        # These are unused - legacy? Remove if no issues.
+        #default_params = {'relativistic': ('atomic_zora', 'scalar'),
+        #                  'xc': 'pbe',
+        #                  'compute_forces': True,
+        #                  }
+        #if state == 2:
+        #    default_params['use_dipole_correction'] = 'true'
+        #if state >= 2:
+        #    default_params['k_grid'] = True
 
         # Assertion test that the correct calculators and default arguments are being set
         if ase_env_check('3.22.0'):
@@ -79,12 +80,14 @@ def test_run_aims():
         if state >= 2:
             assert params['k_grid'] is None
 
-        # libxc test
+        # libxc test (and also check we can change relativistic effectively)
         sockets_calc, fhi_calc = get_aims_and_sockets_calculator(dimensions=state, verbose=True,
-                                                                 xc='libxc MGGA_X_MBEEF+GGA_C_PBE_SOL')
+                                                                 xc='libxc MGGA_X_MBEEF+GGA_C_PBE_SOL',
+                                                                 relativistic='none')
         params = getattr(fhi_calc, 'parameters')
         assert params['override_warning_libxc'] == 'true'
         assert params['xc'] == 'libxc MGGA_X_MBEEF+GGA_C_PBE_SOL'
+        assert params['relativistic'] == 'none'
 
     # Test to make sure that we correctly handle scenario when environment variable isn't
     # set in ASE 3.23. This presents issues downstream, so environment must be set 
