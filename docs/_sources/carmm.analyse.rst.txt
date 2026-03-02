@@ -116,6 +116,14 @@ carmm.analyse.neighbours module
    :undoc-members:
    :show-inheritance:
 
+carmm.analyse.phonon\_analysis module
+-------------------------------------
+
+.. automodule:: carmm.analyse.phonon_analysis
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 carmm.analyse.pickle\_dos module
 --------------------------------
 

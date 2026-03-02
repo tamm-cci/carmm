@@ -60,6 +60,14 @@ carmm.build.facets module
    :undoc-members:
    :show-inheritance:
 
+carmm.build.get\_displaced\_structures\_phonon module
+-----------------------------------------------------
+
+.. automodule:: carmm.build.get_displaced_structures_phonon
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 carmm.build.pymatgen\_surface module
 ------------------------------------
 

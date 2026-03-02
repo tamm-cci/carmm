@@ -1136,6 +1136,148 @@ TODO: make table neater</p></li>
 </dd></dl>
 
 </section>
+<section id="module-carmm.analyse.phonon_analysis">
+<span id="carmm-analyse-phonon-analysis-module"></span><h2>carmm.analyse.phonon_analysis module<a class="headerlink" href="#module-carmm.analyse.phonon_analysis" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="carmm.analyse.phonon_analysis.generate_phonon_data">
+<span class="sig-prename descclassname"><span class="pre">carmm.analyse.phonon_analysis.</span></span><span class="sig-name descname"><span class="pre">generate_phonon_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bandstructure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thermal_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#carmm.analyse.phonon_analysis.generate_phonon_data" title="Link to this definition">¶</a></dt>
+<dd><p>Generate phonon-related data such as phonon band structures and
+thermodynamic properties.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bandstructure</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True (default), compute the phonon band structure along a chosen
+high-symmetry path in the Brillouin zone using the information available in the band.conf file obtained from
+get_band_conf function.</p></li>
+<li><p><strong>thermal_properties</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True (default), compute thermodynamic quantities derived from the phonon density of states (DOS), such as
+free energy, entropy, and heat capacity as a function of temperature. This needs the thermal.conf file
+generated using the get_thermal_conf function.</p></li>
+<li><p><strong>path</strong> (<em>str</em><em>, </em><em>optional</em>) – Path pointing towards the directory that is working directory for this workflow.
+In this function, the path will be used to read the band.conf and thermal.conf to plot</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>None.</em></p></li>
+<li><p><em>Runs the terminal commands and generates the following files</em></p></li>
+<li><p><em>FORCE_SETS – force information obtained using the phonopy API. This is needed for all post-processing of data</em></p></li>
+<li><p><em>band.pdf – phonon band structure</em></p></li>
+<li><p><em>band.yaml – phonon band structure data as yaml file. use the phonon_data_to_csv to obtain the data as a csv file</em></p></li>
+<li><p><em>thermal.pdf – thermal properties plotted as a function of temperature</em></p></li>
+<li><p><em>thermal_properties.yaml - thermal properties data as yaml file. use the phonon_data_to_csv to obtain the data as a</em></p></li>
+<li><p><em>csv file</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>To obtain the thermal properties, it is necessary to keep the parameter bandstructure=True, because thermal
+properties are derived from phonon density of states (DOS). In that case, if thermal_properties=True and bandstructure=False,
+the code will run the bandstructure command automatically to avoid any errors.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="carmm.analyse.phonon_analysis.get_band_conf">
+<span class="sig-prename descclassname"><span class="pre">carmm.analyse.phonon_analysis.</span></span><span class="sig-name descname"><span class="pre">get_band_conf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#carmm.analyse.phonon_analysis.get_band_conf" title="Link to this definition">¶</a></dt>
+<dd><p>Generate the band structure configuration (band.conf file) for a given atomic structure.
+The band.conf file is necessary to generate a phonon bandstructure once the force set are collected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – structure of the unit cell as ase.Atoms object to generate the high symmetry points in the reciprocal space.</p></li>
+<li><p><strong>path</strong> (<em>str</em><em>, </em><em>optional</em>) – Path pointing towards the directory that is working directory for this workflow.
+In this function, the path will be used to write the band.conf which has the details about crystal symmetry in
+reciprocal space.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>None</em></p></li>
+<li><p><em>Generates a band.conf file in the working directory that will be required for further post-processing.</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>This function serves as a helper to prepare configuration file to generate the phonon bandstructure.</p></li>
+<li><p>The exact k-path convention may depend on the crystal system</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="carmm.analyse.phonon_analysis.get_thermal_conf">
+<span class="sig-prename descclassname"><span class="pre">carmm.analyse.phonon_analysis.</span></span><span class="sig-name descname"><span class="pre">get_thermal_conf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#carmm.analyse.phonon_analysis.get_thermal_conf" title="Link to this definition">¶</a></dt>
+<dd><p>Generate the thermal properties configuration (thernal.conf file)
+The thermal.conf file is necessary to generate a thermal properties data once the force set are collected and the
+phonon bandstructure is generated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>min_temp</strong> (<em>int</em><em>, </em><em>optional</em>) – The minimum temperature (in K) for calculating the thermal properties.
+Default value is O K</p></li>
+<li><p><strong>max_temp</strong> (<em>int</em><em>, </em><em>optional</em>) – The maximum temperature (in K) for calculating the thermal properties.
+Default value is 1000 K</p></li>
+<li><p><strong>step</strong> (<em>int</em><em>, </em><em>optional</em>) – Temperature steps for calculating the thermal properties.
+Default value is 10. For example, the properties will be calculated at 0, 10, 20, … so on</p></li>
+<li><p><strong>path</strong> (<em>str</em><em>, </em><em>optional</em>) – Path pointing towards the directory that is working directory for this workflow.
+In this function, the path will be used to write the thermal.conf which has the details thermal properties
+calculated using the phonopy Python package.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>None</em></p></li>
+<li><p><em>Generates a thermal.conf file in the working directory that will be required for further post-processing.</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>This function serves as a helper to prepare configuration file to generate the thermal property data like</p></li>
+</ul>
+<p>energy, entropy, Helmholtz free energy and heat capacity.
+- NOTE: currently the temperature range is from 0 to 1000 K. For a majority of systems, the range is sufficient to
+understand the thermal properties. Future development may allow for custom range.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="carmm.analyse.phonon_analysis.phonon_data_to_csv">
+<span class="sig-prename descclassname"><span class="pre">carmm.analyse.phonon_analysis.</span></span><span class="sig-name descname"><span class="pre">phonon_data_to_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">band_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thermal_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'band.yaml'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thermal_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'thermal_properties.yaml'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#carmm.analyse.phonon_analysis.phonon_data_to_csv" title="Link to this definition">¶</a></dt>
+<dd><p>Convert phonon calculation results from YAML files into CSV format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>band_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, parse phonon band structure data from <cite>band_file</cite> (needs to be .yaml) and
+export it to a CSV file. Default is False.</p></li>
+<li><p><strong>thermal_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, parse phonon thermal property data from <cite>thermal_file</cite> (needs to be .yaml) and
+export it to a CSV file. Default is True.</p></li>
+<li><p><strong>band_file</strong> (<em>str</em><em>, </em><em>optional</em>) – File name of the YAML file containing phonon band structure data.
+Default is ‘band.yaml’.</p></li>
+<li><p><strong>thermal_file</strong> (<em>str</em><em>, </em><em>optional</em>) – File name of the YAML file containing thermal property data.
+Default is ‘thermal_properties.yaml’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function writes CSV files to disk and does not return any value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The band structure YAML file (e.g., produced by Phonopy) typically
+contains q-points and frequencies</p></li>
+<li><p>The thermal properties YAML file contains temperature-dependent
+quantities such as free energy, entropy, and heat capacity.</p></li>
+<li><p>The resulting CSV files are formatted for easy plotting or further
+numerical analysis with standard tools.</p></li>
+</ul>
+</dd></dl>
+
+</section>
 <section id="module-carmm.analyse.pickle_dos">
 <span id="carmm-analyse-pickle-dos-module"></span><h2>carmm.analyse.pickle_dos module<a class="headerlink" href="#module-carmm.analyse.pickle_dos" title="Link to this heading">¶</a></h2>
 <dl class="py function">
