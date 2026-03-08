@@ -1,4 +1,4 @@
-def get_band_conf(atoms):
+def get_band_conf(atoms, path=None):
     """
     Generate the band structure configuration (band.conf file) for a given atomic structure.
     The band.conf file is necessary to generate a phonon bandstructure once the force set are collected.
@@ -7,6 +7,10 @@ def get_band_conf(atoms):
     ----------
     atoms : ase.Atoms
         structure of the unit cell as ase.Atoms object to generate the high symmetry points in the reciprocal space.
+    path: str, optional
+        Path pointing towards the directory that is working directory for this workflow.
+        In this function, the path will be used to write the band.conf which has the details about crystal symmetry in
+        reciprocal space.
 
     Returns
     -------
@@ -51,19 +55,19 @@ def get_band_conf(atoms):
     print(band_final)
 
     try:
-        f = open('band.conf', 'x')
+        f = open(f'{path}/band.conf', 'x')
         f.close()
     except:
         print()
 
-    f = open('band.conf', 'w')
+    f = open(f'{path}/band.conf', 'w')
     f.write(f'BAND = {band_final}\n'
             f'BAND_LABELS = {band_label_final}\n'
             f'BAND_POINTS = 101\n')
     f.close()
 
 
-def get_thermal_conf(min_temp=0, max_temp=1000, step=10):
+def get_thermal_conf(min_temp=0, max_temp=1000, step=10, path=None):
     """
     Generate the thermal properties configuration (thernal.conf file)
     The thermal.conf file is necessary to generate a thermal properties data once the force set are collected and the
@@ -80,7 +84,10 @@ def get_thermal_conf(min_temp=0, max_temp=1000, step=10):
     step: int, optional
         Temperature steps for calculating the thermal properties.
         Default value is 10. For example, the properties will be calculated at 0, 10, 20, ... so on
-
+    path: str, optional
+        Path pointing towards the directory that is working directory for this workflow.
+        In this function, the path will be used to write the thermal.conf which has the details thermal properties
+        calculated using the phonopy Python package.
 
     Returns
     -------
@@ -95,7 +102,7 @@ def get_thermal_conf(min_temp=0, max_temp=1000, step=10):
     understand the thermal properties. Future development may allow for custom range.
 
     """
-    f = open('thermal.conf', 'w')
+    f = open(f'{path}/thermal.conf', 'w')
     f.write(f'TPROP =.TRUE.\n'
             f'TMIN ={min_temp}\n'
             f'TMAX ={max_temp}\n'
@@ -103,7 +110,7 @@ def get_thermal_conf(min_temp=0, max_temp=1000, step=10):
             f'MESH = 16 16 16\n')
     f.close()
 
-def generate_phonon_data(bandstructure=True, thermal_properties=True):
+def generate_phonon_data(bandstructure=True, thermal_properties=True, path=None):
     """
     Generate phonon-related data such as phonon band structures and
     thermodynamic properties.
@@ -119,6 +126,9 @@ def generate_phonon_data(bandstructure=True, thermal_properties=True):
         If True (default), compute thermodynamic quantities derived from the phonon density of states (DOS), such as
         free energy, entropy, and heat capacity as a function of temperature. This needs the thermal.conf file
         generated using the get_thermal_conf function.
+    path: str, optional
+        Path pointing towards the directory that is working directory for this workflow.
+        In this function, the path will be used to read the band.conf and thermal.conf to plot
 
     Returns
     -------
@@ -140,6 +150,9 @@ def generate_phonon_data(bandstructure=True, thermal_properties=True):
     the code will run the bandstructure command automatically to avoid any errors.
     """
     import os
+    parent_dir = os.getcwd()
+    path_final = os.path.join(parent_dir, path)
+    os.chdir(path_final)
     os.system("phonopy -f disp-*/aims.out")
     if bandstructure:
         os.system("phonopy -p -s band.conf")
@@ -150,10 +163,11 @@ def generate_phonon_data(bandstructure=True, thermal_properties=True):
             if thermal_properties:
                 os.system("phonopy -p -s band.conf")
                 os.system("phonopy -p -s thermal.conf")
+    os.chdir(parent_dir)
 
 
 def phonon_data_to_csv(band_data=False, thermal_data=True,
-                       band_file='band.yaml', thermal_file='thermal_properties.yaml'):
+                       band_file='band.yaml', thermal_file='thermal_properties.yaml', path=None):
     """
     Convert phonon calculation results from YAML files into CSV format.
 
@@ -166,10 +180,10 @@ def phonon_data_to_csv(band_data=False, thermal_data=True,
         If True, parse phonon thermal property data from `thermal_file` (needs to be .yaml) and
         export it to a CSV file. Default is True.
     band_file : str, optional
-        Path to the YAML file containing phonon band structure data.
+        File name of the YAML file containing phonon band structure data.
         Default is 'band.yaml'.
     thermal_file : str, optional
-        Path to the YAML file containing thermal property data.
+        File name of the YAML file containing thermal property data.
         Default is 'thermal_properties.yaml'.
 
     Returns
@@ -193,14 +207,14 @@ def phonon_data_to_csv(band_data=False, thermal_data=True,
     import os
     import csv
     if thermal_data:
-        if os.path.exists(thermal_file):
+        if os.path.exists(f'{path}/{thermal_file}'):
             property_list = ['Energy (kJ/mol)', 'Entropy (J/K/mol)', 'Helmholtz free energy (kJ/mol)', 'Heat Capacity (J/K/mol)']
             header = ['Temperature (K)']+property_list
-            csv_file = f'thermal_data.csv'
+            csv_file = f'{path}/thermal_data.csv'
             with open(csv_file, mode='w', newline='') as file:
                 writer = csv.writer(file)
                 writer.writerow(header)
-                stream = open(thermal_file, 'r')
+                stream = open(f'{path}/{thermal_file}', 'r')
                 dictionary = yaml.load(stream, Loader)
                 for data in dictionary['thermal_properties']:
                     writer.writerow([data['temperature'], data['energy'], data['entropy'], data['free_energy'],
@@ -211,10 +225,10 @@ def phonon_data_to_csv(band_data=False, thermal_data=True,
             raise Exception('The file \'thermal_properties.yaml\' not found. Make sure you are providing the correct '
                             'file name to the thermal_file parameter in the function')
     if band_data:
-        if os.path.exists(band_file):
-            csv_file = f'band_data.csv'
+        if os.path.exists(f'{path}/{band_file}'):
+            csv_file = f'{path}/band_data.csv'
             with open(csv_file, mode='w', newline='') as file:
-                stream = open(band_file, 'r')
+                stream = open(f'{path}/{band_file}', 'r')
                 dictionary = yaml.load(stream, Loader)
                 freqencies_header = [f'frequency {i+1}' for i in range(len(dictionary['phonon'][0]['band']))]
                 header = ['q-position[0]', 'q-position[1]', 'q-position[2]', 'Distance']+freqencies_header

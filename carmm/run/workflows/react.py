@@ -200,7 +200,11 @@ class ReactAims:
                     traj_name = f"{subdirectory_name}/{str(counter)}_{self.filename}_{str(opt_restarts)}.traj"
 
                     if relax_unit_cell:
-                        from ase.constraints import StrainFilter
+                        if not ase_env_check():
+                            # Legacy, ASE Version < 3.23
+                            from ase.constraints import StrainFilter
+                        else:
+                            from ase.filters import StrainFilter
                         unit_cell_relaxer = StrainFilter(self.initial)
                         opt = optimiser(unit_cell_relaxer, trajectory=traj_name, **opt_kwargs)
                     else:
@@ -381,7 +385,13 @@ class ReactAims:
             Transition state geometry structure
         """
 
-        from catlearn.optimize.mlneb import MLNEB
+        if not ase_env_check('3.27.0'):
+            # Sadly this is dead code. Needs removing
+            from catlearn.optimize.mlneb import MLNEB
+        else:
+            # Hacked import so the code still runs
+            from ase.mep import NEB as MLNEB
+
         from ase.io import write
 
         #TODO: calling mlneb.run() generates files in the current directory, reverting to os.chdir() necessary
@@ -499,8 +509,10 @@ class ReactAims:
 
                     os.chdir(subdirectory_name)
 
-                    """Setup the Catlearn object for MLNEB"""
-                    neb_catlearn = MLNEB(start=initial,
+                    # Code split for different ASE versions                   
+                    if not ase_env_check('3.27.0'):
+                        """Setup the Catlearn object for MLNEB"""
+                        neb_catlearn = MLNEB(start=initial,
                                          end=final,
                                          ase_calc=calculator,
                                          n_images=n,
@@ -509,6 +521,19 @@ class ReactAims:
                                          prev_calculations=self.prev_calcs,
                                          mic=True,
                                          restart=restart)
+                    else:
+                        # Running a vanilla NEB calculation. Need a starting path for NEB
+                        images = [initial] 
+                        images += [initial.copy() for i in range(n)]
+                        images += [final]
+                        
+                        neb_catlearn = MLNEB(images)
+                        neb_catlearn.interpolate(method=self.interpolation, 
+                                         mic=True)
+
+                        for image in images[1:-2]:
+                            image.calc=calculator 
+                     
                     if not self.dry_run:
                         """Run the NEB optimisation. Adjust fmax to desired convergence criteria, usually 0.05 eV/A"""
                         neb_catlearn.run(fmax=fmax,

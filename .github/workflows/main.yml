@@ -60,6 +60,11 @@ jobs:
         python -m pip install --upgrade pytest
         python -m pip install --upgrade pytest-cov
         python -m pip install --upgrade pymatgen
+        if [[ "${{ matrix.python-version }}" == "3.8" ]]; then
+        python -m pip install phonopy==2.19.1
+        else
+        python -m pip install --upgrade phonopy
+        fi
         # Removing as presumably MACE will automatically install dependencies
         # python -m pip install torch torchvision torchaudio
         
