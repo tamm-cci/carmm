@@ -65,11 +65,14 @@ def read_stress_from_outputs(path=None, output_file_type='.out'):
     from ase.io import read
     import numpy as np
     import os
+
     if path is None:
         home = os.getcwd()
     else:
         home = path
+
     file_ext = ['.traj', '.xyz']
+
     if output_file_type in file_ext:
         stress_list = []
         for defor in os.listdir(home):
@@ -126,8 +129,55 @@ def read_stress_from_outputs(path=None, output_file_type='.out'):
         raise ValueError(
             f'The file extension provided is not supported. Please make sure it is one of the following [.traj, .xyz, .out]')
 
+# testing something to see if we can solve the CI test issues
+def diff_fit_local(strains, stresses, eq_stress=None, order=2, tol: float = 1e-10):
 
-def compute_elasticity_tensor(strain_tensor,stress_tensor,path=None,write_elasticity_tensor=True,write_output=True):
+# def diff_fit(strains, stresses, eq_stress=None, order=2, tol: float = 1e-10):
+#     from pymatgen.analysis.elasticity import get_strain_state_dict, get_diff_coeff, generate_pseudo, subs, get_symbol_list
+#     from pymatgen.core.tensors import Tensor
+#     strain_state_dict = get_strain_state_dict(strains, stresses, eq_stress=eq_stress, tol=tol, add_eq=True, sort=True)
+#     v_subs = np.vectorize(subs)
+#     # Collect derivative data
+#     c_list = []
+#     dei_dsi = np.zeros((order - 1, 6, len(strain_state_dict)))
+#     for idx, (strain_state, data) in enumerate(strain_state_dict.items()):
+#         hvec = data["strains"][:, strain_state.index(1)]
+#         for _ord in range(1, order):
+#             coef = get_diff_coeff(hvec, _ord)
+#             dei_dsi[_ord - 1, :, idx] = np.dot(coef, data["stresses"])
+#
+#     m, _absent = generate_pseudo(list(strain_state_dict), order)
+#     for _ord in range(1, order):
+#         cvec, carr = get_symbol_list(_ord + 1)
+#         svec = np.ravel(dei_dsi[_ord - 1].T)
+#         cmap = dict(zip(cvec, np.dot(m[_ord - 1], svec)))
+#         c_list.append(v_subs(carr, cmap))
+#     return [Tensor.from_voigt(c) for c in c_list]
+    from pymatgen.analysis.elasticity import get_strain_state_dict, get_diff_coeff, generate_pseudo, subs, get_symbol_list
+    from pymatgen.core.tensors import Tensor
+    import numpy as np
+
+    strain_state_dict = get_strain_state_dict(strains, stresses, eq_stress=eq_stress, tol=tol, add_eq=True, sort=True)
+    v_subs = np.vectorize(subs)
+    # Collect derivative data
+    c_list = []
+    dei_dsi = np.zeros((order - 1, 6, len(strain_state_dict)))
+    for idx, (strain_state, data) in enumerate(strain_state_dict.items()):
+        hvec = data["strains"][:, strain_state.index(1)]
+        for _ord in range(1, order):
+            coef = get_diff_coeff(hvec, _ord)
+            dei_dsi[_ord - 1, :, idx] = np.dot(coef, data["stresses"])
+
+    m, _absent = generate_pseudo(list(strain_state_dict), order)
+    for _ord in range(1, order):
+        cvec, carr = get_symbol_list(_ord + 1)
+        svec = np.ravel(dei_dsi[_ord - 1].T)
+        cmap = dict(zip(cvec, np.dot(m[_ord - 1], svec)))
+        c_list.append(v_subs(carr, cmap))
+
+    return [Tensor.from_voigt(c) for c in c_list]
+
+def compute_elasticity_tensor(strain_tensor,stress_tensor,path=None,write_elasticity_tensor=False,write_output=False,tol=1e-10):
     """
     Compute the elasticity tensor from strain and stress tensors.
 
@@ -151,6 +201,8 @@ def compute_elasticity_tensor(strain_tensor,stress_tensor,path=None,write_elasti
     write_output : bool, optional
         If True (default), print summary information such as the unique values in elasticity tensor,
          complete strain and stress tensors.
+    tol : float, optional
+        Value under which matrix elements are ignored. Made variable to aid CI testing.
 
     Returns
     -------
@@ -165,11 +217,12 @@ def compute_elasticity_tensor(strain_tensor,stress_tensor,path=None,write_elasti
     - The unique values are printed in output summary because the crystal symmetry causes several
       elements of the tensor to be equal. Hence, the unique values come in handy when comparing with literature values.
     """
-    import pickle
-    import numpy as np
+    #import numpy as np
     from pymatgen.analysis.elasticity import diff_fit
     import os
-    elasticity_tensor = diff_fit(strain_tensor, stress_tensor, order=2)
+ 
+    elasticity_tensor = diff_fit(strain_tensor, stress_tensor, order=2, tol=tol)
+    #elasticity_tensor = diff_fit_local(strain_tensor, stress_tensor, order=2)
     #print(np.unique(np.array(elasticity_tensor[0]), return_index=True)[0] * 160.2716621)
 
     if path is None:
@@ -199,6 +252,8 @@ def write_elasticity_output(stress_tensor, strain_tensor, elasticity_tensor, pat
         corresponding to each strain in `strain_tensor`. Units depend on the underlying simulation code.
     elasticity_tensor : numpy.ndarray
         The fourth-rank elasticity tensor (C_{ijkl})
+    path : string
+        Directory for storing files
 
     Returns
     -------
@@ -253,6 +308,9 @@ def write_elasticity_tensor_pickle(elasticity_tensor, path):
 
     np.savez(
         f"{path}/elasticity_tensor.npz",
-        elasticity_tensor=np.array(elasticity_tensor[0]))
+        strain_tensor=np.array(elasticity_tensor[0]))
+
+
+
 
 

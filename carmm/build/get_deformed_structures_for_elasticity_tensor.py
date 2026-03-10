@@ -39,7 +39,6 @@ def generate_deformed_strutures(atoms_object, path=None, norm_strains = [0.01, 0
     - Shear strains modify lattice angles and introduce off-diagonal
       distortions.
     """
-    import pickle
     import numpy as np
     from pymatgen.analysis.elasticity import Strain, Deformation
     from pymatgen.io.ase import AseAtomsAdaptor
@@ -64,11 +63,13 @@ def generate_deformed_strutures(atoms_object, path=None, norm_strains = [0.01, 0
     if write_strain:
         strain_tensor = np.array(strain_list)
         if path is None:
-            with open('strain_tensor.pkl', 'wb') as fp:
-                pickle.dump(strain_tensor, fp)
+            np.savez(
+                f"strain_tensor.npz",
+                strain_tensor=strain_tensor)
         else:
-            with open(f'{path}/strain_tensor.pkl', 'wb') as fp:
-                pickle.dump(strain_tensor, fp)
+            np.savez(
+                f"{path}/strain_tensor.npz",
+                strain_tensor=strain_tensor)
 
     return structure, deformations
 

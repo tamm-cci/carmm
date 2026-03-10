@@ -31,7 +31,7 @@ def test_get_deformed_structures():
 
     import os
     assert(os.path.exists(f'{example_path}/defor_1/geometry.in')) # whether the deformed structures are generated
-    assert (os.path.exists(f'{example_path}/strain_tensor.pkl'))  # whether the strain tensor is written
+    assert (os.path.exists(f'{example_path}/strain_tensor.npz'))  # whether the strain tensor is written
 
     #########
 
