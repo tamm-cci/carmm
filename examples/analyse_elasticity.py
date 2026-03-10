@@ -36,4 +36,6 @@ def test_analyse_elasticity():
     ########
 
 # Run the example
+from build_deformed_structures_elastic import test_get_deformed_structures
 test_analyse_elasticity()
+test_get_deformed_structures()
