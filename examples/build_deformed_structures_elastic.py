@@ -36,4 +36,4 @@ def test_get_deformed_structures():
     #########
 
 # Run the example
-#test_get_deformed_structures()
+test_get_deformed_structures()

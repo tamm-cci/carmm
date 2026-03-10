@@ -12,6 +12,7 @@ def test_analyse_elasticity():
     assert np.isclose(np.sum(strain_tensor), 0.36) 
  
     stress_tensor = read_stress_from_outputs(path=example_path,output_file_type='.xyz')
+    print(stress_tensor)
     # assert stress_tensor.shape == (12, 3, 3)
     assert np.isclose(np.sum(stress_tensor), 0.7399586028807125)
     
@@ -36,6 +37,6 @@ def test_analyse_elasticity():
     ########
 
 # Run the example
-from build_deformed_structures_elastic import test_get_deformed_structures
+# from build_deformed_structures_elastic import test_get_deformed_structures
 test_analyse_elasticity()
-test_get_deformed_structures()
+# test_get_deformed_structures()
