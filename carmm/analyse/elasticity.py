@@ -71,22 +71,17 @@ def read_stress_from_outputs(path=None, output_file_type='.out'):
     else:
         home = path
 
-    print(home)
     file_ext = ['.traj', '.xyz']
 
     if output_file_type in file_ext:
         stress_list = []
         for defor in os.listdir(home):
             if os.path.isdir(f'{home}/{defor}'):
-                print('Directory confirmed')
                 for file in os.listdir(f'{home}/{defor}'):
-                    print(file)
                     if file.endswith(output_file_type):
-                        print('inside if statement')
                         atoms = read(f'{home}/{defor}/{file}')
                         stress = atoms.get_stress(voigt=False)
                         stress_list.append(stress)
-                        print('stress collected')
 
         stress_tensor = np.array(stress_list)
 
@@ -136,28 +131,6 @@ def read_stress_from_outputs(path=None, output_file_type='.out'):
 
 # testing something to see if we can solve the CI test issues
 def diff_fit_local(strains, stresses, eq_stress=None, order=2, tol: float = 1e-10):
-
-# def diff_fit(strains, stresses, eq_stress=None, order=2, tol: float = 1e-10):
-#     from pymatgen.analysis.elasticity import get_strain_state_dict, get_diff_coeff, generate_pseudo, subs, get_symbol_list
-#     from pymatgen.core.tensors import Tensor
-#     strain_state_dict = get_strain_state_dict(strains, stresses, eq_stress=eq_stress, tol=tol, add_eq=True, sort=True)
-#     v_subs = np.vectorize(subs)
-#     # Collect derivative data
-#     c_list = []
-#     dei_dsi = np.zeros((order - 1, 6, len(strain_state_dict)))
-#     for idx, (strain_state, data) in enumerate(strain_state_dict.items()):
-#         hvec = data["strains"][:, strain_state.index(1)]
-#         for _ord in range(1, order):
-#             coef = get_diff_coeff(hvec, _ord)
-#             dei_dsi[_ord - 1, :, idx] = np.dot(coef, data["stresses"])
-#
-#     m, _absent = generate_pseudo(list(strain_state_dict), order)
-#     for _ord in range(1, order):
-#         cvec, carr = get_symbol_list(_ord + 1)
-#         svec = np.ravel(dei_dsi[_ord - 1].T)
-#         cmap = dict(zip(cvec, np.dot(m[_ord - 1], svec)))
-#         c_list.append(v_subs(carr, cmap))
-#     return [Tensor.from_voigt(c) for c in c_list]
     from pymatgen.analysis.elasticity import get_strain_state_dict, get_diff_coeff, generate_pseudo, subs, get_symbol_list
     from pymatgen.core.tensors import Tensor
     import numpy as np

@@ -15,18 +15,13 @@ def test_analyse_elasticity():
     assert np.isclose(np.sum(strain_tensor), 0.36) 
  
     stress_tensor = read_stress_from_outputs(path=example_path,output_file_type='.xyz')
-    # print(stress_tensor)
-    # assert stress_tensor.shape == (12, 3, 3)
+    assert stress_tensor.shape == (12, 3, 3)
 
     assert np.isclose(np.sum(stress_tensor), 0.7399586028807125)
     
     # Compute elasticity tensor
     elasticity_tensor = compute_elasticity_tensor(strain_tensor, stress_tensor=stress_tensor, path=example_path, tol=1e-20)
     assert elasticity_tensor.shape == (3, 3, 3, 3)
-    # Troublesome assertions
-    print(elasticity_tensor[0,0,0,0])
-    print(np.sum(elasticity_tensor))
-
 
     assert np.isclose(np.sum(elasticity_tensor), 56.758888874202626)
     assert np.isclose(elasticity_tensor[0,0,0,0], 2.87069649301488)
