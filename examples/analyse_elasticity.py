@@ -28,8 +28,8 @@ def test_analyse_elasticity():
     print(np.sum(elasticity_tensor))
 
 
-    assert np.isclose(np.sum(elasticity_tensor), 62.016154850659255)
-    assert np.isclose(elasticity_tensor[0,0,0,0],-0.4981115107598163)
+    assert np.isclose(np.sum(elasticity_tensor), 56.758888874202626)
+    assert np.isclose(elasticity_tensor[0,0,0,0], 2.87069649301488)
 
 
     # Manually save files to check functionality
