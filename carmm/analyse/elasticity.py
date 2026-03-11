@@ -80,7 +80,9 @@ def read_stress_from_outputs(path=None, output_file_type='.out'):
             if os.path.isdir(f'{home}/{defor}'):
                 print('Directory confirmed')
                 for file in os.listdir(f'{home}/{defor}'):
+                    print(file)
                     if file.endswith(output_file_type):
+                        print('inside if statement')
                         atoms = read(f'{home}/{defor}/{file}')
                         stress = atoms.get_stress(voigt=False)
                         stress_list.append(stress)
