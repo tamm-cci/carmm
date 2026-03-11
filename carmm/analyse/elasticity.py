@@ -308,7 +308,7 @@ def write_elasticity_tensor_pickle(elasticity_tensor, path):
 
     np.savez(
         f"{path}/elasticity_tensor.npz",
-        strain_tensor=np.array(elasticity_tensor[0]))
+        elasticity_tensor=np.array(elasticity_tensor[0]))
 
 
 
