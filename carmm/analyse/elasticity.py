@@ -71,17 +71,20 @@ def read_stress_from_outputs(path=None, output_file_type='.out'):
     else:
         home = path
 
+    print(home)
     file_ext = ['.traj', '.xyz']
 
     if output_file_type in file_ext:
         stress_list = []
         for defor in os.listdir(home):
             if os.path.isdir(f'{home}/{defor}'):
+                print('Directory confirmed')
                 for file in os.listdir(f'{home}/{defor}'):
                     if file.endswith(output_file_type):
                         atoms = read(f'{home}/{defor}/{file}')
                         stress = atoms.get_stress(voigt=False)
                         stress_list.append(stress)
+                        print('stress collected')
 
         stress_tensor = np.array(stress_list)
 
