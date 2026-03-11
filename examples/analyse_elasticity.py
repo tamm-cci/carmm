@@ -4,7 +4,9 @@ def test_analyse_elasticity():
     '''
     import numpy as np
     from carmm.analyse.elasticity import read_strain_tensor_from_pkl, read_stress_from_outputs, compute_elasticity_tensor
-    example_path = 'data/elasticity_tensor_workflow/'
+    import os
+    base = os.getcwd()
+    example_path = f'{base}/data/elasticity_tensor_workflow/'
     
     # These are just checks that the file read functionality is valid
     strain_tensor = read_strain_tensor_from_pkl(example_path+'strain_tensor.npz')

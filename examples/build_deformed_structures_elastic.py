@@ -8,8 +8,10 @@ def test_get_deformed_structures():
 
     from carmm.build.get_deformed_structures_for_elasticity_tensor import generate_deformed_strutures, create_files_and_directories
     from ase.io import read
+    import os
+    base = os.getcwd()
 
-    example_path = 'data/elasticity_tensor_workflow'
+    example_path = f'{base}/data/elasticity_tensor_workflow/'
     eq_bulk = read(f'{example_path}/Co_Opt_mace_mp.traj') # reading MACE-MP optimized bulk structure.
 
     structure, deformations = generate_deformed_strutures(atoms_object=eq_bulk, path=example_path)
