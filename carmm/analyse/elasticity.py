@@ -304,12 +304,20 @@ def write_elasticity_tensor_pickle(elasticity_tensor, path):
         This function writes output to disk.
     """
 
+<<<<<<< HEAD
+    import pickle
+    import numpy as np
+
+    with open(f'{path}/elasticity_tensor.pkl', 'wb') as fp:
+        pickle.dump(np.array(elasticity_tensor[0]), fp)
+=======
     import numpy as np
 
     np.savez(
         f"{path}/elasticity_tensor.npz",
         strain_tensor=np.array(elasticity_tensor[0]))
 
+>>>>>>> origin/elasticity
 
 
 

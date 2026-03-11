@@ -21,7 +21,10 @@ jobs:
     # Therefore, need different os versions for different Python versions.
     # The type of runner that the job will run on
     runs-on: ${{ matrix.os }}
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/elasticity
     env:
       OPENBLAS_NUM_THREADS: 1
       OMP_NUM_THREADS: 1
@@ -60,6 +63,7 @@ jobs:
         python -m pip install --upgrade pytest
         python -m pip install --upgrade pytest-cov
         python -m pip install --upgrade pymatgen
+        python -m pip install numpy==1.26.4
         if [[ "${{ matrix.python-version }}" == "3.8" ]]; then
         python -m pip install phonopy==2.19.1
         else

@@ -1,7 +1,15 @@
+<<<<<<< HEAD
+#===============================================================================
+# Created using the Atomic Simulation Environment (ASE)
+
+# Fri Mar  6 15:37:07 2026
+
+=======
 #=======================================================
 # FHI-aims file: C:\Users\akash\OneDrive - Cardiff University\Desktop\elasticity_tensor_calculations\test_mace_calc\defor_12/geometry.in
 # Created using the Atomic Simulation Environment (ASE)
 # Wed Dec  3 17:07:38 2025
+>>>>>>> origin/elasticity
 #=======================================================
 lattice_vector 3.5211070668383782 -0.0000000018990359 0.0000000009871267 
 lattice_vector -0.0000000019581864 3.5211091481988315 0.0000000221641415 
