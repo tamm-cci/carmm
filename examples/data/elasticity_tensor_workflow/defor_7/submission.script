@@ -1,0 +1,38 @@
+#!/bin/bash
+
+#SBATCH -J 'CI-test'
+#SBATCH -n 72
+#SBATCH -o o.%J
+#SBATCH -e e.%J
+#SBATCH -p grace
+#SBATCH -t 0-00:24:00
+
+module purge
+module load brics/default
+module load PrgEnv-gnu
+#Add Python environment
+module load cray-python/3.11.7
+
+#Launch correct venv and load carmm
+. /home/c5b/akashhiregange.c5b/venv-3.11/bin/activate
+export PYTHONPATH=/home/c5b/akashhiregange.c5b/carmm:$PYTHONPATH
+
+#Set variables
+export SCRATCH=/scratch/c5b/$USER
+export TEMP_DIRECTORY="$SCRATCH/$SLURM_JOB_ID"
+export HOME_DIRECTORY=$PWD
+export VERSION=231212
+
+mkdir $TEMP_DIRECTORY
+cp * $TEMP_DIRECTORY
+cd $TEMP_DIRECTORY
+
+#Print runtime environment 
+echo $SLURM_NNODES
+printenv
+
+#Run calculation
+time python3 input.py > fhiaims.isambard3.log.$SLURM_JOB_ID 2>&1
+
+#Return calculation files. 
+mv $TEMP_DIRECTORY $HOME_DIRECTORY

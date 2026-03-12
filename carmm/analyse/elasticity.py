@@ -25,7 +25,7 @@ def read_strain_tensor_from_pkl(pkl_file_path):
     strain_tensor = data["strain_tensor"]
     return strain_tensor
 
-def read_stress_from_outputs(path=None, output_file_type='.out'):
+def read_stress_from_outputs(path=None, output_file_type='.xyz'):
     """
     Read and extract the stress tensor from simulation output files.
 
@@ -44,7 +44,7 @@ def read_stress_from_outputs(path=None, output_file_type='.out'):
 
     output_file_type : str, optional
         File extension specifying the type of output file to
-        parse. Default is '.out'. Typical values include:
+        parse. Default is '.xyz'. Typical values include:
             - 'traj'        : ASE trajectory file containing stress information
             - 'xyz'        : XYZ file containing stress information
         The behavior depends on the implementation of the corresponding parser.
@@ -87,39 +87,39 @@ def read_stress_from_outputs(path=None, output_file_type='.out'):
 
         return stress_tensor
 
-    elif output_file_type=='.out':
-        stress_list = []
-        for defor in os.listdir():
-            if os.path.isdir(f'{home}/{defor}'):
-                for file in os.listdir(f'{home}/{defor}'):
-                    if file.endswith('.out'):
-                        pass
-                        f = open(f'{home}/{defor}/{file}', 'r')
-                        stress = []
-                        # manually searching for stress components in aims.out file. Hopefully there is a better way to do it.
-                        lines = f.readlines()
-                        search_str = '  |                    Cartesian components [eV/A**3]                 |\n'
-                        if search_str in lines:
-                            index = lines.index(search_str)
-                            stress.append(float(lines[index + 4].split()[2]))
-                            stress.append(float(lines[index + 4].split()[3]))
-                            stress.append(float(lines[index + 4].split()[4]))
-                            stress.append(float(lines[index + 5].split()[2]))
-                            stress.append(float(lines[index + 5].split()[3]))
-                            stress.append(float(lines[index + 5].split()[4]))
-                            stress.append(float(lines[index + 6].split()[2]))
-                            stress.append(float(lines[index + 6].split()[3]))
-                            stress.append(float(lines[index + 6].split()[4]))
-
-                        try:
-                            stress = np.array(stress).reshape(3,3)
-                            stress_list.append(stress)
-                            # print(stress)
-                            f.close()
-                        except Exception as e:
-                            print('Error encountered. See the message below')
-                            print(e)
-                            f.close()
+    # elif output_file_type=='.out':
+    #     stress_list = []
+    #     for defor in os.listdir():
+    #         if os.path.isdir(f'{home}/{defor}'):
+    #             for file in os.listdir(f'{home}/{defor}'):
+    #                 if file.endswith('.out'):
+    #                     pass
+    #                     f = open(f'{home}/{defor}/{file}', 'r')
+    #                     stress = []
+    #                     # manually searching for stress components in aims.out file. Hopefully there is a better way to do it.
+    #                     lines = f.readlines()
+    #                     search_str = '  |                    Cartesian components [eV/A**3]                 |\n'
+    #                     if search_str in lines:
+    #                         index = lines.index(search_str)
+    #                         stress.append(float(lines[index + 4].split()[2]))
+    #                         stress.append(float(lines[index + 4].split()[3]))
+    #                         stress.append(float(lines[index + 4].split()[4]))
+    #                         stress.append(float(lines[index + 5].split()[2]))
+    #                         stress.append(float(lines[index + 5].split()[3]))
+    #                         stress.append(float(lines[index + 5].split()[4]))
+    #                         stress.append(float(lines[index + 6].split()[2]))
+    #                         stress.append(float(lines[index + 6].split()[3]))
+    #                         stress.append(float(lines[index + 6].split()[4]))
+    #
+    #                     try:
+    #                         stress = np.array(stress).reshape(3,3)
+    #                         stress_list.append(stress)
+    #                         # print(stress)
+    #                         f.close()
+    #                     except Exception as e:
+    #                         print('Error encountered. See the message below')
+    #                         print(e)
+    #                         f.close()
 
         stress_tensor = np.array(stress_list)
 
@@ -128,32 +128,6 @@ def read_stress_from_outputs(path=None, output_file_type='.out'):
     else:
         raise ValueError(
             f'The file extension provided is not supported. Please make sure it is one of the following [.traj, .xyz, .out]')
-
-# testing something to see if we can solve the CI test issues
-# def diff_fit_local(strains, stresses, eq_stress=None, order=2, tol: float = 1e-10):
-#     from pymatgen.analysis.elasticity import get_strain_state_dict, get_diff_coeff, generate_pseudo, subs, get_symbol_list
-#     from pymatgen.core.tensors import Tensor
-#     import numpy as np
-#
-#     strain_state_dict = get_strain_state_dict(strains, stresses, eq_stress=eq_stress, tol=tol, add_eq=True, sort=True)
-#     v_subs = np.vectorize(subs)
-#     # Collect derivative data
-#     c_list = []
-#     dei_dsi = np.zeros((order - 1, 6, len(strain_state_dict)))
-#     for idx, (strain_state, data) in enumerate(strain_state_dict.items()):
-#         hvec = data["strains"][:, strain_state.index(1)]
-#         for _ord in range(1, order):
-#             coef = get_diff_coeff(hvec, _ord)
-#             dei_dsi[_ord - 1, :, idx] = np.dot(coef, data["stresses"])
-#
-#     m, _absent = generate_pseudo(list(strain_state_dict), order)
-#     for _ord in range(1, order):
-#         cvec, carr = get_symbol_list(_ord + 1)
-#         svec = np.ravel(dei_dsi[_ord - 1].T)
-#         cmap = dict(zip(cvec, np.dot(m[_ord - 1], svec)))
-#         c_list.append(v_subs(carr, cmap))
-#
-#     return [Tensor.from_voigt(c) for c in c_list]
 
 def compute_elasticity_tensor(strain_tensor,stress_tensor,path=None,write_elasticity_tensor=False,write_output=False,tol=1e-10):
     """
