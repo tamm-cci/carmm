@@ -87,44 +87,6 @@ def read_stress_from_outputs(path=None, output_file_type='.xyz'):
 
         return stress_tensor
 
-    # elif output_file_type=='.out':
-    #     stress_list = []
-    #     for defor in os.listdir():
-    #         if os.path.isdir(f'{home}/{defor}'):
-    #             for file in os.listdir(f'{home}/{defor}'):
-    #                 if file.endswith('.out'):
-    #                     pass
-    #                     f = open(f'{home}/{defor}/{file}', 'r')
-    #                     stress = []
-    #                     # manually searching for stress components in aims.out file. Hopefully there is a better way to do it.
-    #                     lines = f.readlines()
-    #                     search_str = '  |                    Cartesian components [eV/A**3]                 |\n'
-    #                     if search_str in lines:
-    #                         index = lines.index(search_str)
-    #                         stress.append(float(lines[index + 4].split()[2]))
-    #                         stress.append(float(lines[index + 4].split()[3]))
-    #                         stress.append(float(lines[index + 4].split()[4]))
-    #                         stress.append(float(lines[index + 5].split()[2]))
-    #                         stress.append(float(lines[index + 5].split()[3]))
-    #                         stress.append(float(lines[index + 5].split()[4]))
-    #                         stress.append(float(lines[index + 6].split()[2]))
-    #                         stress.append(float(lines[index + 6].split()[3]))
-    #                         stress.append(float(lines[index + 6].split()[4]))
-    #
-    #                     try:
-    #                         stress = np.array(stress).reshape(3,3)
-    #                         stress_list.append(stress)
-    #                         # print(stress)
-    #                         f.close()
-    #                     except Exception as e:
-    #                         print('Error encountered. See the message below')
-    #                         print(e)
-    #                         f.close()
-
-        stress_tensor = np.array(stress_list)
-
-        return stress_tensor
-
     else:
         raise ValueError(
             f'The file extension provided is not supported. Please make sure it is one of the following [.traj, .xyz, .out]')
@@ -174,8 +136,6 @@ def compute_elasticity_tensor(strain_tensor,stress_tensor,path=None,write_elasti
     import os
  
     elasticity_tensor = diff_fit(strain_tensor, stress_tensor, order=2, tol=tol)
-    #elasticity_tensor = diff_fit_local(strain_tensor, stress_tensor, order=2)
-    #print(np.unique(np.array(elasticity_tensor[0]), return_index=True)[0] * 160.2716621)
 
     if path is None:
         path = os.getcwd()
