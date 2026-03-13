@@ -22,8 +22,8 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ${{ matrix.os }}
 
-    env:
-      OPENBLAS_NUM_THREADS: 1
+    #env:
+      #OPENBLAS_NUM_THREADS: 1
     strategy:
       matrix:
         include:
