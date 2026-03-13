@@ -24,9 +24,6 @@ jobs:
 
     env:
       OPENBLAS_NUM_THREADS: 1
-      OMP_NUM_THREADS: 1
-      MKL_NUM_THREADS: 1
-      NUMEXPR_NUM_THREADS: 1
     strategy:
       matrix:
         include:
