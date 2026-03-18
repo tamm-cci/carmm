@@ -17,8 +17,6 @@ jobs:
     # This allows us to find the workflow in checks
     name: ci-test
     
-    # The latest version of ubuntu dropped support for Python 3.7 leading to CI test failure. 
-    # Therefore, need different os versions for different Python versions.
     # The type of runner that the job will run on
     runs-on: ${{ matrix.os }}
     strategy:
@@ -54,20 +52,8 @@ jobs:
         python -m pip install --upgrade pytest
         python -m pip install --upgrade pytest-cov
         python -m pip install --upgrade pymatgen
-        if [[ "${{ matrix.python-version }}" == "3.8" ]]; then
-        python -m pip install phonopy==2.19.1
-        else
         python -m pip install --upgrade phonopy
-        fi
-        # Removing as presumably MACE will automatically install dependencies
-        # python -m pip install torch torchvision torchaudio
-        
-        # Installing different mace versions for different versions of Python as MACE > 0.3.4 fails on Python 3.7
-        if [[ "${{ matrix.python-version }}" == "3.7" ]]; then
-            pip install mace-torch==0.3.4
-        else
-            pip install --upgrade mace-torch
-        fi
+        python -m pip install --upgrade mace-torch
         
         # Debug
         python -m pip freeze
