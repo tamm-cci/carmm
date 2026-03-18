@@ -17,7 +17,7 @@ Folder names are designed to be self explanatory:
 
 **examples/notebooks** - some tutorials written in Jupyter notebooks
 
-Insert the carmm subdirectory into your systems `PYTHONPATH` variable (e.g., `~/.bashrc`) and it should automatically pick up the functions in the child folders. 
+To use the package, you will need Python 3.9 or later; insert the carmm subdirectory into your systems `PYTHONPATH` variable (e.g., `~/.bashrc`) and it should automatically pick up the functions in the child folders. 
 
 **Example:** `export PYTHONPATH=/path/to/this/folder:$PYTHONPATH`
  
