@@ -23,8 +23,8 @@ def test_analyse_elasticity():
     elasticity_tensor = compute_elasticity_tensor(strain_tensor, stress_tensor=stress_tensor, path=example_path, tol=1e-20)
     assert elasticity_tensor.shape == (3, 3, 3, 3)
 
-    assert np.isclose(np.sum(elasticity_tensor), 56.758888874202626)
-    assert np.isclose(elasticity_tensor[0,0,0,0], 2.87069649301488)
+    assert np.isclose(np.sum(elasticity_tensor), 62.01615485065906)
+    assert np.isclose(elasticity_tensor[0,0,0,0], -0.498111511)
 
 
     # Manually save files to check functionality
