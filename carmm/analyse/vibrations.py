@@ -25,7 +25,7 @@ def vib_analysis(model):
             distances = []
             for atoms in traj:
                 dist = atoms.get_distances(i, j, mic=True)
-                distances.append(float(dist))
+                distances.append(np.float64(dist))
             dist_list = distances
             return dist_list
 
