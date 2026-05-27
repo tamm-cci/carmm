@@ -1,41 +1,3 @@
-def neighbour_cutout_sphere(atoms, centre, distance_cutoff=5.0):
-    '''
-    Returns a spherical cutout of a structure
-    TODO: This doesn't work with periodic boundary conditions.
-    TODO:Could probably integrate this with the neighbor function bellow
-
-    Parameters:
-
-    atoms: Atoms object
-        Input structure to cutout from
-    centre: Integer
-        Index of central atom in cutout
-    distance_cutoff: Float
-        Distance which inside atoms are counted as neighbours
-    '''
-
-    import numpy as np
-
-    # Prevents unexpected editing of parent object in place
-    # Now ensures returned object is different to incoming atoms
-    atoms = atoms.copy()
-    selection = []
-
-    for i in range(len(atoms)):
-
-        # get distances between atom of interest and others
-
-
-        #################### Edit atom tag ###############################
-        distance_ab = np.linalg.norm((atoms.positions[centre] - atoms.positions[i]))
-
-        ################ Edit distance in Angstrom here ###################
-        if distance_ab < distance_cutoff:
-            selection.append(i)
-
-
-    return selection
-
 # Authors: Owain Beynon, Igor Kowalec
 def neighbours(atoms, centre, shell, cutoff=None, verbose=False):
     ''' Returns a list of indices of atomic neighbors from a central atom
@@ -74,7 +36,7 @@ def neighbours(atoms, centre, shell, cutoff=None, verbose=False):
 
     # Creates an empty list an appends atom indices whose distances are
     # x amount nearest neighbours away from centre
-    for neighbors in range(shell):
+    for this_shell in range(shell):
         # keep new neighbor indices in a set to avoid duplicates
         new_neighbors = set()
         for index in all_neighbours:
@@ -93,7 +55,11 @@ def neighbours(atoms, centre, shell, cutoff=None, verbose=False):
             for shell in range(len(shell_list)):
                 print("Shell", shell, "contains atoms with indices:", shell_list[shell])
 
-    return list(all_neighbours), shell_list
+    all_neighbours = list(all_neighbours)
+    atoms_copy = atoms.copy()
+    selection = atoms_copy[all_neighbours]
+
+    return all_neighbours, shell_list, selection
 
 
 # Authors: Igor Kowalec, Lara Kabalan, Jack Warren
@@ -199,3 +165,28 @@ def surface_coordination(atoms, cutoff=None, verbose=True):
 
 
     return dict_CN, dict_surf_CN
+
+def first_nearest_neighbours_list(atoms, site_indices=None):
+    '''
+    Calculate the neighbouring atoms for any given atom or list of atoms
+    
+    Parameters:
+
+    atoms: An ASE atoms object
+        The object to be interrogated
+    site_indices:  
+        A list of index values for which the coordination number must be calculated
+    Returns:
+        - A list of neighbours for each interrogated species
+    '''
+
+    fnn_list = []
+
+    if site_indices is None: 
+        raise ValueError("An integer value in a list form, or list of integers, is needed to evaluate the GCN")
+
+    for i in site_indices: 
+        all_neighbour_atoms, shell_list, selection = neighbours(atoms, [i], 1, verbose=False)
+        fnn_list.append(shell_list[1])
+
+    return fnn_list

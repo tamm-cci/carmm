@@ -1,9 +1,11 @@
-[![github](https://github.com/logsdail/carmm/actions/workflows/main.yml/badge.svg)](https://github.com/logsdail/carmm/actions)
-[![codecov.io](https://codecov.io/gh/logsdail/carmm/coverage.svg)](https://codecov.io/gh/logsdail/carmm)
+[![github](https://github.com/tamm-cci/carmm/actions/workflows/main.yml/badge.svg)](https://github.com/tamm-cci/carmm/actions)
+[![codecov.io](https://codecov.io/gh/tamm-cci/carmm/coverage.svg)](https://codecov.io/gh/tamm-cci/carmm)
 
 # Cardiff Molecular Modelling
 
-General scripts and software for everyday computational chemistry. Folder names are designed to be self explanatory but just in case we have:
+General scripts and software for everyday computational chemistry. Documentation of functionality is available at: https://tamm-cci.github.io/carmm/.
+
+Folder names are designed to be self explanatory:
 
 **carmm/build** - contains functions to build stuff
 
@@ -15,9 +17,9 @@ General scripts and software for everyday computational chemistry. Folder names 
 
 **examples/notebooks** - some tutorials written in Jupyter notebooks
 
-Insert the carmm subdirectory into your systems PYTHONPATH variable (e.g. ~/.bashrc) and it should automatically pick up the functions in the child folders. 
+To use the package, you will need Python 3.9 or later; insert the carmm subdirectory into your systems `PYTHONPATH` variable (e.g., `~/.bashrc`) and it should automatically pick up the functions in the child folders. 
 
-*Example: export PYTHONPATH=/path/to/this/folder:$PYTHONPATH*
+**Example:** `export PYTHONPATH=/path/to/this/folder:$PYTHONPATH`
  
 If you want to contribute, great! Here are excellent resources on:
 - best programming practice: https://gist.github.com/sloria/7001839.

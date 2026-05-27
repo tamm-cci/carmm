@@ -35,6 +35,10 @@ def counterpoise_calc(complex_struc, a_id, b_id, fhi_calc=None, a_name=None, b_n
 
     Returns: float. counterpoise correction value for basis set superposition error
     """
+
+    from carmm.utils.python_env_check import ase_env_check
+
+    print("Use version 230612 or newer ones, or empty sites won't work with PBC\n")
     # Check if a_id and b_id are mapped correctly and convert symbols to indices
     a_id, b_id = check_and_convert_id(complex_struc, a_id, b_id)
 
@@ -53,17 +57,41 @@ def counterpoise_calc(complex_struc, a_id, b_id, fhi_calc=None, a_name=None, b_n
     # Empty sites does not work with forces. Remove compute_forces.
     if 'compute_forces' in fhi_calc.parameters:
         fhi_calc.parameters.pop('compute_forces')
+    if 'sc_accuracy_forces' in fhi_calc.parameters:
+        if verbose:
+            print('Stop calculation as there is a convergence criterion regarding force.', '\n',
+                  'Empty sites do not work with forces. Remove and check how it affects your results.')
+        raise KeyError('Found sc_accuracy_forces in parameters! FHI-aims can not calculate forces on empty sites.')
     # Create an empty list to store energies for postprocessing.
     energies = []
     for index in range(4):
-        fhi_calc.outfilename = species_list[index] + '.out'
-        structures_cp[index].calc = fhi_calc
-        # Run the calculation. A workaround. Default calculate function doesn't work with ghost atoms.
-        calculate_energy_ghost_compatible(calc=structures_cp[index].calc, atoms=structures_cp[index],
-                                          ghosts=ghosts_lists_cp[index], dry_run=dry_run)
-        # Get the energy from the converged output.
-        energy_i = structures_cp[index].get_potential_energy()
-        energies.append(energy_i)
+
+        if not ase_env_check('3.23.0'):
+            fhi_calc.outfilename = species_list[index] + '.out'
+            structures_cp[index].calc = fhi_calc
+            # Run the calculation. A workaround. Default calculate function doesn't work with ghost atoms.
+            calculate_energy_ghost_compatible(calc=structures_cp[index].calc, atoms=structures_cp[index],
+                                              ghosts=ghosts_lists_cp[index], dry_run=dry_run)
+            # Get the energy from the converged output.
+            energy_i = structures_cp[index].get_potential_energy()
+            energies.append(energy_i)
+        else:
+            fhi_calc.template.outputname = species_list[index] + '.out'
+            fhi_calc.parameters['ghosts'] = ghosts_lists_cp[index]
+            # Scaled positions does not work with empty sites.
+            fhi_calc.parameters['scaled'] = False
+            structures_cp[index].calc = fhi_calc
+            if dry_run:
+                structures_cp[index].calc.template.write_input(fhi_calc.profile, fhi_calc.directory,
+                                                               structures_cp[index], fhi_calc.parameters,
+                                                               fhi_calc.implemented_properties)
+                structures_cp[index].calc.results['energy'] = get_energy_dryrun(fhi_calc.directory,
+                                                                                fhi_calc.template.outputname)
+                structures_cp[index].calc.atoms = structures_cp[index]
+
+            # Get the energy from the converged output.
+            energy_i = structures_cp[index].get_potential_energy()
+            energies.append(energy_i)
 
     # Counterpoise correction for basis set superposition error. See docstring for the formula.
     cp_corr = energies[0] + energies[2] - energies[1] - energies[3]
@@ -98,7 +126,7 @@ def check_and_convert_id(complex_struc, a_id, b_id):
             raise RuntimeError("a_id and b_id should be either lists of indices or lists of strings")
 
     if id_type is str:
-        if len(a_id + b_id) != len(complex_struc.symbols):
+        if len(a_id + b_id) != len(set(complex_struc.symbols)):
             raise RuntimeError("The number of symbols are not the same as in the complex")
         # Convert symbols to indices
         a_id = [atom.index for atom in complex_struc if atom.symbol in a_id]
@@ -168,11 +196,31 @@ def calculate_energy_ghost_compatible(calc, atoms=None, properties=['energy'],
 
     """
     from ase.calculators.calculator import Calculator
-    import subprocess
+    import subprocess, os
     Calculator.calculate(calc, atoms, properties, system_changes)
-    calc.write_input(calc.atoms, properties, system_changes, ghosts=ghosts)
+    # Write inputfiles. Scaled positions does not work with empty sites.
+    calc.write_input(calc.atoms, properties, system_changes, ghosts=ghosts, scaled=False)
     command = calc.command
+
     if dry_run:  # Only for CI tests
-        command = 'ls'
-    subprocess.check_call(command, shell=True, cwd=calc.directory)
+        command = ''  # Used to be 'ls'
+    converged = False
+    if os.path.exists(calc.directory+'/'+calc.outfilename):
+        converged = calc.read_convergence()
+    if (not converged) or dry_run:
+        subprocess.check_call(command, shell=True, cwd=calc.directory)
+
     calc.read_results()
+
+
+# Lazy work around
+def get_energy_dryrun(dir, outputname):
+    """Parse the energy from the aims.out file"""
+    import numpy as np
+    f = open(dir / outputname, 'r')
+    fd = f.readlines()
+    for line in fd:
+        if 'Total energy corrected' in line:
+            energy_line = line
+
+    return float(energy_line.split()[5])

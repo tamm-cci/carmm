@@ -1,15 +1,17 @@
 # Author: Igor Kowalec
 import os
-import numpy as np
+#import numpy as np
 from ase.calculators.emt import EMT
 from ase import Atoms
 from ase.io import read
-from ase.vibrations import Vibrations
+#from ase.vibrations import Vibrations
 from carmm.analyse.forces import is_converged
 from carmm.run.aims_path import set_aims_command
 from ase.io import Trajectory
 from carmm.run.workflows.helper import CalculationHelper
-from ase.optimize import BFGS
+from carmm.utils.logger_set import set_logger
+from carmm.utils.python_env_check import ase_env_check
+#from ase.optimize import BFGS
 
 # TODO: Enable serialization with ASE db - save locations of converged files as well as all properties
 
@@ -25,7 +27,9 @@ class ReactAims:
                  filename: str = None,
                  nodes_per_instance: int = None,
                  dry_run: bool = False,
-                 verbose: bool = True):
+                 verbose: bool = True,
+                 warning_lvl: int = 1
+                 ):
         """
         Args:
             params: dict
@@ -44,7 +48,7 @@ class ReactAims:
             dry_run: bool
                 A dry run flag for CI-test
             verbose: bool
-                Enables the the verbosity of the performed operations
+                Enables the verbosity of the performed operations
 
         Returns ReactAims object
         """
@@ -57,6 +61,8 @@ class ReactAims:
         self.filename = filename
         self.nodes_per_instance = nodes_per_instance
         self.verbose = verbose
+
+        self.logger = set_logger("react_logger", warning_lvl)
 
         """Define additional parameters"""
         self.initial = None  # input for optimisation or input for NEB initial image
@@ -71,8 +77,18 @@ class ReactAims:
         """ Set the test flag"""
         self.dry_run = dry_run
 
+        if hpc == "custom":
+            self.logger.debug(f"WARNING: You have selected 'custom' as an option for HPC.                      ")
+            self.logger.debug(f"         This requires a couple of extra steps from the user side.             ")
+            self.logger.debug(f"         1) A new environmental variable - CARMM_AIMS_ROOT_DIRECTORY           ")
+            self.logger.debug(f"            - must be set. This helps find the folder containing the           ")
+            self.logger.debug(f"             default basis function.                                           ")
+            self.logger.debug(f"         2) ASE_AIMS_COMMAND must be set, with the correct number of           ")
+            self.logger.debug(f"            mpi tasks if desired. Avoid piping output, as React has its own    ")
+            self.logger.debug(f"            output folder names.                                               ")
+
     def aims_optimise(self, atoms: Atoms, fmax: float = 0.01, post_process: str = None, relax_unit_cell: bool = False,
-                      restart: bool = True):
+                      restart: bool = True, optimiser=None, opt_kwargs: dict = {}, mace_preopt=False):
 
         """
          The function needs information about structure geometry (model), name of hpc system
@@ -95,6 +111,10 @@ class ReactAims:
              True requests a strain filter unit cell relaxation
          restart: bool
              Request restart from previous geometry if True (True by default)
+         optimiser: optimiser class
+            If None - the ase.optimize.BFGS is used
+         opt_kwargs: dict
+            Dictionary of keyword arguments specific to the provided optimiser class
 
          Returns a list containing the model with data calculated using your choice of settings
          [model_optimised, model_postprocessed]
@@ -113,14 +133,20 @@ class ReactAims:
         if initial is not None:
             self.initial = initial
 
-        self._perform_optimization(subdirectory_name, out, counter, fmax, relax_unit_cell)
+        if mace_preopt and not initial:
+            """Make sure to skip preoptimisations if AIMs restart information is available."""
+            assert self._MaceReactor is not None, "Please set MaceReact_Preoptimiser if mace_preopt is True"
+
+            self.initial = self._mace_preoptimise(self.initial, fmax, relax_unit_cell, optimiser, opt_kwargs)
+
+        self._perform_optimization(subdirectory_name, out, counter, fmax, relax_unit_cell, optimiser, opt_kwargs)
         self._finalize_optimization(subdirectory_name, post_process)
 
         return self.model_optimised, self.model_post_processed
 
     def _initialize_parameters(self, atoms):
         """
-        Internal function for obtainining periodic boundary conditions from the provided Atoms object and generating
+        Internal function for obtaining periodic boundary conditions from the provided Atoms object and generating
          a filename if necessary. Values are then assigned to self.
 
         Args:
@@ -133,9 +159,10 @@ class ReactAims:
         if not self.filename:
             self.filename = self.initial.get_chemical_formula()
 
-    def _perform_optimization(self, subdirectory_name: str, out: str, counter: int, fmax: float, relax_unit_cell: bool):
+    def _perform_optimization(self, subdirectory_name: str, out: str, counter: int, fmax: float, relax_unit_cell: bool,
+                              optimiser, opt_kwargs: dict):
         """
-        An internal function used in aims_optimise to resolve the working directoryand perform the optimisation
+        An internal function used in aims_optimise to resolve the working directory and perform the optimisation
         calculation of a given structure.
 
         Args:
@@ -144,11 +171,16 @@ class ReactAims:
             counter: int
             fmax: float
             relax_unit_cell: bool
+            optimiser: bool or optimiser class
+            opt_kwargs: dict
 
         Returns:None
 
         """
         opt_restarts = 0
+        if not optimiser:
+            from ase.optimize import BFGS
+            optimiser = BFGS
 
         if not is_converged(self.initial, fmax):
             os.makedirs(subdirectory_name, exist_ok=True)
@@ -168,11 +200,15 @@ class ReactAims:
                     traj_name = f"{subdirectory_name}/{str(counter)}_{self.filename}_{str(opt_restarts)}.traj"
 
                     if relax_unit_cell:
-                        from ase.constraints import StrainFilter
+                        if not ase_env_check():
+                            # Legacy, ASE Version < 3.23
+                            from ase.constraints import StrainFilter
+                        else:
+                            from ase.filters import StrainFilter
                         unit_cell_relaxer = StrainFilter(self.initial)
-                        opt = BFGS(unit_cell_relaxer, trajectory=traj_name, alpha=70.0)
+                        opt = optimiser(unit_cell_relaxer, trajectory=traj_name, **opt_kwargs)
                     else:
-                        opt = BFGS(self.initial, trajectory=traj_name, alpha=70.0)
+                        opt = optimiser(self.initial, trajectory=traj_name, **opt_kwargs)
 
                     opt.run(fmax=fmax, steps=80)
                     opt_restarts += 1
@@ -286,7 +322,7 @@ class ReactAims:
             self.initial.get_potential_energy()
 
         if not self.dry_run:
-            charges = extract_mulliken_charge(out, len(self.initial))
+            charges = extract_mulliken_charge(f'{subdirectory_name}/{out}', len(self.initial))
         else:
             """Return dummy charges for testing"""
             charges = [0 for atom in self.initial]
@@ -299,11 +335,10 @@ class ReactAims:
 
         return self.initial
 
-
     def search_ts(self, initial: Atoms, final: Atoms,
                   fmax: float, unc: float, interpolation=None,
                   n=0.25, steps=40, restart=True, prev_calcs=None,
-                  input_check=0.01):
+                  input_check=0.01, mace_preopt=0, preopt_maxsteps=200):
         """
         This function allows calculation of the transition state using the CatLearn software package in an
         ASE/sockets/FHI-aims setup. The resulting converged band will be located in the MLNEB.traj file.
@@ -334,12 +369,30 @@ class ReactAims:
             input_check: float or None
                 If float the calculators of the input structures will be checked if the structures are below
                 the requested fmax and an optimisation will be performed if not.
+            mace_preopt: None or str
+                Controls whether to use a MACE preoptimised TS path, and the work flow used for preoptimisation
+                Requires a MACE calculator be attached to the React_AIMs object via the MaceReact_Preoptimiser
+                property.
+                None       -     No MACE pre-optimisation
+                fullpath   -     MACE preoptimises TS before FHI-aims - FHI-aims inherits all structures from MACE.
+                tspath     -     MACE preoptimises after FHI-aims check - MACE receives initial and reactant
+                                 structures from FHI-aims and does not optimise
+            preopt_maxsteps: int
+                Controls the maximum number of steps used in the preoptimiser before giving up and passing the 
+                calculation onto MLNEB with FHI-aims.
 
         Returns: Atoms object
             Transition state geometry structure
         """
 
-        from catlearn.optimize.mlneb import MLNEB
+        if not ase_env_check('3.27.0'):
+            # Sadly this is dead code. Needs removing
+            from catlearn.optimize.mlneb import MLNEB
+        else:
+            # Hacked import so the code still runs
+            from ase.mep import NEB as MLNEB
+
+        from ase.io import write
 
         #TODO: calling mlneb.run() generates files in the current directory, reverting to os.chdir() necessary
         assert not self.nodes_per_instance, "ReactAims.nodes_per_instance is not None \n" \
@@ -358,9 +411,35 @@ class ReactAims:
 
         self._initialize_parameters(initial)
 
-
         """Set the environment parameters"""
         set_aims_command(hpc=hpc, basis_set=basis_set, defaults=2020, nodes_per_instance=self.nodes_per_instance)
+
+        '''Setup the TS calculation'''
+        helper = CalculationHelper(calc_type="TS",
+                                   parent_dir=os.getcwd(),
+                                   filename=self.filename,
+                                   restart=restart,
+                                   verbose=self.verbose)
+
+        counter, out, subdirectory_name, minimum_energy_path = helper.restart_setup()
+
+        """Set MACE Pre-optimisation flavor"""
+        self.mace_preopt_flavour = None
+        if mace_preopt is not None and not minimum_energy_path:
+            assert isinstance(n, int), "Integer number of images required for MACE TS preoptimiser"
+            assert self._MaceReactor is not None, "Please set MaceReact_Preoptimiser if mace_preopt is True."
+            assert input_check, "Mace Preoptimisation workflow requires input be set to 'float'."
+            self.mace_preopt_flavour = mace_preopt
+
+        """Run preoptimisation flavour 1"""
+        if self.mace_preopt_flavour == "fullpath":
+
+            preopt_ts = self._mace_preoptimise_ts(initial, final, fmax, n, self.interpolation,
+                                                  input_check, max_steps=preopt_maxsteps)
+
+            initial = preopt_ts[0]
+            final = preopt_ts[-1]
+            self.mace_interpolation = preopt_ts
 
         if input_check:
             filename_copy = self.filename
@@ -375,20 +454,21 @@ class ReactAims:
             """Set original name after input check is complete"""
             self.filename = filename_copy
 
-        '''Setup the TS calculation'''
-        helper = CalculationHelper(calc_type="TS",
-                                   parent_dir=os.getcwd(),
-                                   filename=self.filename,
-                                   restart=restart,
-                                   verbose=self.verbose)
+        """Run preotimisation flavour 2"""
+        if self.mace_preopt_flavour == "tspath":
 
-        counter, out, subdirectory_name, minimum_energy_path = helper.restart_setup()
+            preopt_ts = self._mace_preoptimise_ts(initial, final, fmax, n, self.interpolation,
+                                                  input_check, max_steps=preopt_maxsteps)
+
+            self.mace_interpolation = preopt_ts
+
         if not minimum_energy_path:
             minimum_energy_path = [None, None]
 
         traj_name = f"{subdirectory_name}/ML-NEB.traj"
 
         if not minimum_energy_path[0]:
+
             """Create the sockets calculator - using a with statement means the object is closed at the end."""
             with _calc_generator(params,
                                  out_fn=out,
@@ -408,13 +488,31 @@ class ReactAims:
 
                 iterations = 0
 
+                if (self.mace_preopt_flavour is not None) and (not os.path.exists(traj_name)):
+                    """GAB: ML-NEB misbehaves if a calculator is not provided for interpolated images"""
+                    """     following function ensures correct calculators are attached with closed  """
+                    """     sockets.                                                                 """
+                    self.interpolation = [ image.copy() for image in self.mace_interpolation[1:-1] ]
+                    self.interpolation = [initial] + self.interpolation + [final]
+
+                    for idx, image in enumerate(self.interpolation):
+                        self.attach_calculator(self.interpolation[idx], params,
+                                           out_fn=out, dimensions=self.dimensions, directory=subdirectory_name,
+                                           calc_e=True)
+
+                    initial = self.interpolation[0]
+                    final   = self.interpolation[-1]
+
                 while not os.path.exists(traj_name):
                     if iterations > 0:
                         self.prev_calcs = read(f"{subdirectory_name}/last_predicted_path.traj@:")
 
                     os.chdir(subdirectory_name)
-                    """Setup the Catlearn object for MLNEB"""
-                    neb_catlearn = MLNEB(start=initial,
+
+                    # Code split for different ASE versions                   
+                    if not ase_env_check('3.27.0'):
+                        """Setup the Catlearn object for MLNEB"""
+                        neb_catlearn = MLNEB(start=initial,
                                          end=final,
                                          ase_calc=calculator,
                                          n_images=n,
@@ -423,6 +521,19 @@ class ReactAims:
                                          prev_calculations=self.prev_calcs,
                                          mic=True,
                                          restart=restart)
+                    else:
+                        # Running a vanilla NEB calculation. Need a starting path for NEB
+                        images = [initial] 
+                        images += [initial.copy() for i in range(n)]
+                        images += [final]
+                        
+                        neb_catlearn = MLNEB(images)
+                        neb_catlearn.interpolate(method=self.interpolation, 
+                                         mic=True)
+
+                        for image in images[1:-2]:
+                            image.calc=calculator 
+                     
                     if not self.dry_run:
                         """Run the NEB optimisation. Adjust fmax to desired convergence criteria, usually 0.05 eV/A"""
                         neb_catlearn.run(fmax=fmax,
@@ -435,155 +546,19 @@ class ReactAims:
                         iterations += 1
                         os.chdir(parent_dir)
                     else:
+
+                        os.chdir(parent_dir)
                         return None
 
         """Find maximum energy, i.e. transition state to return it"""
         if minimum_energy_path[0]:
             neb = minimum_energy_path[0]
         else:
-            neb = read(traj_name)
+            neb = read(f"{traj_name}@:")
         self.ts = sorted(neb, key=lambda k: k.get_potential_energy(), reverse=True)[0]
 
         return self.ts
 
-
-    """
-    def search_ts_aidneb(self, initial, final, fmax, unc, interpolation=None, n=15,
-                         restart=True, prev_calcs=None, input_check=0.01, verbose=True):
-        '''
-        This function allows calculation of the transition state using the GPAtom software package in an
-        ASE/sockets/FHI-aims setup. The resulting converged band will be located in the AIDNEB.traj file.
-
-        Args:
-            initial: Atoms object
-                Initial structure in the NEB band
-            final: Atoms object
-                Final structure in the NEB band
-            fmax: float
-                Convergence criterion of forces in eV/A
-            unc: float
-                Uncertainty in the fit of the NEB according to the Gaussian Progress Regression model, a secondary
-                convergence criterion.
-            n: int
-                number of middle images, the following is recommended: n * npi = total_no_CPUs
-            interpolation: str or []
-                The "idpp" or "linear" interpolation types are supported in ASE. alternatively user can provide a custom
-                interpolation as a list of Atoms objects.
-            n: int or flot
-                Desired number of middle images excluding start and end pointpo. If float the number of images is based on
-                displacement of atoms. Dense sampling aids convergence but does not increase complexity as significantly
-                as for classic NEB.
-            restart: bool
-                Use previous calculations contained in folders if True, start from scratch if False
-            prev_calcs: list of Atoms objects
-                Manually provide the training set
-            input_check: float or None
-                If float the calculators of the input structures will be checked if the structures are below
-                the requested fmax and an optimisation will be performed if not.
-            verbose: bool
-                Flag for turning off printouts in the code
-
-        Returns: Atoms object
-            Transition state geometry structure
-        '''
-
-        from gpatom.aidneb import AIDNEB
-
-        '''Retrieve common properties'''
-        basis_set = self.basis_set
-        hpc = self.hpc
-        dimensions = sum(initial.pbc)
-        params = self.params
-        parent_dir = os.getcwd()
-        self.interpolation = interpolation
-
-        '''Set the environment parameters'''
-        set_aims_command(hpc=hpc, basis_set=basis_set, defaults=2020, nodes_per_instance=self.nodes_per_instance)
-
-        if not self.interpolation:
-            self.interpolation = "idpp"
-
-        '''Read the geometry'''
-        if self.filename:
-            filename = self.filename
-        else:
-            filename = initial.get_chemical_formula()
-            self.filename = filename
-
-        '''Check for previous calculations'''
-        counter, subdirectory_name = self._restart_setup("TS", filename, restart=restart, verbose=verbose)
-
-        '''Let the user restart from alternative file or Atoms object'''
-        if prev_calcs:
-            self.prev_calcs = prev_calcs
-            if verbose:
-                print("User provided a list of structures manually, training set substituted.")
-
-        elif input_check:
-            if not is_converged(initial, input_check):
-                self.filename += "_initial"
-                initial = self.aims_optimise(initial, input_check, restart=False, verbose=verbose)[0]
-                self.initial = self.model_optimised
-                '''Set original name after input check is complete'''
-                self.filename = filename
-
-            if not is_converged(final, input_check):
-                self.filename = filename + "_final"
-                final = self.aims_optimise(final, input_check, restart=False, verbose=verbose)[0]
-                self.final = self.model_optimised
-                '''Set original name after input check is complete'''
-                self.filename = filename
-
-        out = str(counter) + "_" + str(filename) + ".out"
-
-        os.makedirs(subdirectory_name, exist_ok=True)
-        os.chdir(subdirectory_name)
-
-        # TODO: calculating initial and final structure if possible within the GPAtom code
-
-        '''Sockets setup'''
-        with _calc_generator(params, out_fn=out, dimensions=dimensions)[0] as calculator:
-
-            if self.dry_run:
-                calculator = EMT()
-
-            '''Training set functionality does not work correctly when reading a list.'''
-            '''Instead we save all geometries to a file the GPATOM can use'''
-            training_set_dump = Trajectory("AIDNEB_observations.traj", 'w')
-            for atoms in self.prev_calcs:
-                training_set_dump.write(atoms)
-            training_set_dump.close()
-
-            '''Setup the input for AIDNEB'''
-            aidneb = AIDNEB(start=initial,
-                            end=final,
-                            interpolation=self.interpolation,
-                            # "idpp" can in some cases (e.g. H2) result in geometry coordinates returned as NaN
-                            calculator=calculator,
-                            n_images=n+2,
-                            max_train_data=40,
-                            trainingset="AIDNEB_observations.traj",
-                            use_previous_observations=True,
-                            neb_method='improvedtangent',
-                            mic=True)
-
-            '''Run the NEB optimisation. Adjust fmax to desired convergence criteria, usually 0.01 ev/A'''
-            if not self.dry_run:
-                aidneb.run(fmax=fmax,
-                           unc_convergence=unc,
-                           ml_steps=40)
-            else:
-                os.chdir(parent_dir)
-                return None
-
-        '''Find maximum energy, i.e. transition state to return it'''
-
-        neb = read("AIDNEB.traj@" + str(-len(read("initial_path.traj@:")) - 1) + ":") # read last predicted trajectory
-        self.ts = sorted(neb, key=lambda k: k.get_potential_energy(), reverse=True)[0]
-        os.chdir(parent_dir)
-
-        return self.ts
-    """
 
     def search_ts_taskfarm(self, initial, final, fmax, n, method="string", interpolation="idpp", input_check=0.01,
                            max_steps=100, verbose=True):
@@ -745,6 +720,8 @@ class ReactAims:
         Returns:
             Vibrations object
         """
+        from ase.vibrations import Vibrations
+        import numpy as np
 
         """Retrieve common properties"""
         basis_set = self.basis_set
@@ -797,6 +774,126 @@ class ReactAims:
             vib.write_mode()
             return vib
 
+    @property
+    def MaceReact_Preoptimiser(self):
+        """
+        MACE ASE calculator used in the preoptimisation protocol in aims_optimise or ts_search.
+
+        Args:
+             MaceReact MaceReact Obj:
+               User-defined MaceReact.
+
+        Returns:
+             self._MaceReactor MaceReact Obj:
+               User-defined MaceReact.
+        """
+
+        return self._MaceReactor
+
+    @MaceReact_Preoptimiser.setter
+    def MaceReact_Preoptimiser(self, MaceReact):
+
+        self._MaceReactor = MaceReact
+
+    def _mace_preoptimise(self, atoms: Atoms, fmax, relax_unit_cell, optimiser, opt_kwargs = {}):
+        """
+        Invokes geometry optimisation method using the MACE ASE calculator defined in self.MaceReact_Preoptimiser.
+        The resultant geometry is optimised using FHI-aims in self.aims_optimise. Workflow for optimisation 
+        with MACE defined in ReactMACE module.
+
+        Args:
+            atoms: Atoms object
+            fmax: float
+            relax_unit_cell: bool
+            optimiser: bool or optimiser class
+            opt_kwargs: dict
+        Return:
+           preopt_atoms: Atoms object
+              Atoms object with the calculator object removed
+        """
+
+        filname = self._MaceReactor.filename
+        self._MaceReactor.filename = "MACE_PREOPT_" + self.filename
+
+        preopt_atoms = self._MaceReactor.mace_optimise(atoms, fmax, restart=False, relax_unit_cell=relax_unit_cell,
+                                                       optimiser = optimiser, opt_kwargs = opt_kwargs)
+
+        self._MaceReactor.filename = filname
+
+        # Clean calculator to prevent future problems
+        preopt_atoms.calc = None
+
+        return preopt_atoms
+
+    def _mace_preoptimise_ts(self, initial, final, fmax, n, interpolation, input_check, max_steps=200):
+        """
+        Invokes nudged elastic band (NEB) for an input pathway using the MACE ASE calculator 
+        defined in self.MaceReact_Preoptimiser. Workflow for optimisation with MACE defined in
+        ReactMACE module.
+        
+        The resultant reaciton pathway is optimised using FHI-aims in self.search_ts.
+
+        Args:
+            initial: Atoms object
+            final: Atoms object
+            fmax: float
+            n: int
+            interpolation: string, list of n Atoms objects 
+            input_check: None or float
+
+        Returns:
+           
+        """
+
+        filname = self._MaceReactor.filename
+        self._MaceReactor.filename = "MACE_PREOPT_" + self.filename
+
+        if self.mace_preopt_flavour == "fullpath":
+            input_check = input_check
+        elif self.mace_preopt_flavour == "tspath":
+            input_check = None
+
+        preopt_ts = self._MaceReactor.search_ts_neb(initial, final, fmax, n, k=0.05, method="improvedtangent",
+                                        interpolation=interpolation, input_check=input_check,
+                                        max_steps=max_steps, restart=True)
+
+        self._MaceReactor.filename = filname
+
+        return self._MaceReactor.interpolation.copy()
+
+    def attach_calculator(self, atoms, params,
+                    out_fn="aims.out",
+                    forces=True,
+                    dimensions=2,
+                    relax_unit_cell=False,
+                    directory=".",
+                    calc_e=False):
+        """
+        Potentially a redundant functionality, but condenses attaching and closing a socket
+        calculator to a given Atoms object
+
+        Args:
+            calc_e: Boolean, optional
+                Calculate total energy through Atoms.get_potential_energy().
+
+        Returns:
+            atoms: Atoms
+                Input atoms object with correctly closed socket.
+
+        """
+
+        with _calc_generator(params, out_fn=out_fn, forces=forces, dimensions=dimensions,
+                             relax_unit_cell=relax_unit_cell,directory=directory)[0] as calculator:
+
+            if self.dry_run:
+                calculator = EMT()
+
+            atoms.calc = calculator
+
+            if calc_e:
+                atoms.get_potential_energy()
+
+        return atoms
 
 def _calc_generator(params,
                     out_fn="aims.out",
@@ -805,7 +902,7 @@ def _calc_generator(params,
                     relax_unit_cell=False,
                     directory="."):
     """
-    This is an internal function for generation of an FHi-aims sockets calculator ensuring that keywords
+    This is an internal function for generation of an FHI-aims sockets calculator ensuring that keywords
     required for supported calculation types are added.
 
     Args:
@@ -827,34 +924,39 @@ def _calc_generator(params,
     """New method that gives a default calculator"""
 
     from carmm.run.aims_calculator import get_aims_and_sockets_calculator
+    from ase.calculators.calculator import Parameters
     """On machines where ASE and FHI-aims are run separately (e.g. ASE on login node, FHI-aims on compute nodes)
     we need to specifically state what the name of the login node is so the two packages can communicate"""
     sockets_calc, fhi_calc = get_aims_and_sockets_calculator(dimensions=dimensions,
                                                              logfile=f"{directory}/socketio.log",
                                                              verbose=True,
                                                              codata_warning=False,
-                                                             directory=directory
-                                                             )
+                                                             directory=directory,
+                                                             **params)
 
-    """Remove previous xc argument to ensure libxc warning override is first"""
-    fhi_calc.parameters.pop("xc")
-    fhi_calc.set(override_warning_libxc='True')
+    fhi_calc.parameters['override_warning_libxc'] = 'True'
 
     """Forces required for optimisation"""
     if not forces:
-        fhi_calc.parameters.pop("compute_forces")
+        fhi_calc.parameters = {k: v for k, v in fhi_calc.parameters.items() if k != 'compute_forces'}
 
     """Add analytical stress keyword for unit cell relaxation"""
     if relax_unit_cell:
-        assert dimensions == 3, "Strain Filter calculation requested, but the system is not periodic in all directions."
+        assert dimensions == 3, "Strain Filter calculation requested, but the system is not periodic in 3 dimensions."
+        fhi_calc.parameters['compute_analytical_stress'] = 'True'
 
-        fhi_calc.set(compute_analytical_stress='True')
+    """Sort FHI-aims settings to ensure libxc warning override is prior to xc"""
+    keys = list(fhi_calc.parameters.keys())
+    keys.sort()
+    fhi_calc.parameters = {key: fhi_calc.parameters[key] for key in keys}
+
+    fhi_calc.parameters = Parameters(**fhi_calc.parameters)
 
     """Set a unique .out output name"""
-    fhi_calc.outfilename = out_fn
-
-    """FHI-aims settings set up"""
-    fhi_calc.set(**params)
+    if not ase_env_check('3.23.0'):
+        fhi_calc.outfilename = out_fn
+    else:
+        fhi_calc.template.outputname = out_fn
 
     return sockets_calc, fhi_calc
 
