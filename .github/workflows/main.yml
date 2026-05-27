@@ -51,7 +51,7 @@ jobs:
         python -m pip install --upgrade ase-gpatom
         python -m pip install --upgrade pytest
         python -m pip install --upgrade pytest-cov
-        python -m pip install --upgrade "pymatgen<=2026.3.23, pymatgen-core<2026.4.16"
+        python -m pip install --upgrade "pymatgen<=2026.3.23", "pymatgen-core<2026.4.16"
         python -m pip install --upgrade "phonopy<4.0.0"
         python -m pip install --upgrade mace-torch
         
