@@ -148,10 +148,15 @@ def get_aims_and_sockets_calculator(dimensions,
     fhi_calc = get_aims_calculator(dimensions, **kwargs)
     # Add in PIMD command to get sockets working
     fhi_calc.parameters['use_pimd_wrapper']=[host, port]
-
-    # Setup sockets calculator that "wraps" FHI-aims
-    from ase.calculators.socketio import SocketIOCalculator
-    socket_calc = SocketIOCalculator(fhi_calc, log=logfile, port=port)
+    
+    from carmm.utils.python_env_check import ase_env_check
+    from pathlib import Path
+    if fhi_calc.directory != Path(".") and ase_env_check('3.23.0'):
+        socket_calc = fhi_calc.socketio(port=port)
+    else:
+        # Setup sockets calculator that "wraps" FHI-aims
+        from ase.calculators.socketio import SocketIOCalculator
+        socket_calc = SocketIOCalculator(fhi_calc, log=logfile, port=port)
 
     if codata_warning:
         print("You are using i-Pi based socket connectivity between ASE and FHI-aims.")

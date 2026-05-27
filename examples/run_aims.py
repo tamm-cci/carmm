@@ -23,8 +23,9 @@ def test_run_aims():
     expected_paths_taskfarm = {
         'hawk':      "time srun --nodes=1 --ntasks=40 -d mpirun /apps/local/projects/scw1057/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x",
         'hawk-amd':  'time srun --nodes=1 --ntasks=64 -d mpirun /apps/local/projects/scw1057/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x',
+        'falcon': 'time srun --nodes=1 --ntasks=192 /shared/home2/app_shared/SCWF00007/software/fhi-aims/release/$VERSION/bin/aims.$VERSION.scalapack.mpi.x',
         'isambard':  '',
-        'isambard3': '',
+        'isambard3': 'time srun --nodes=1 --ntasks=144 /projects/c5b/software/fhi-aims/release/$VERSION/bin/aims.$VERSION.scalapack.mpi.x',
         'archer2':   'srun --cpu-bind=cores --distribution=block:block --hint=nomultithread --nodes=1 --ntasks=128 /work/e05/e05-files-log/shared/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x',
         'young':     '',
         'aws':       'time srun --mpi=pmi2 --hint=nomultithread --distribution=block:block --nodes=1 --ntasks=72 apptainer exec /shared/logsdail_group/sing/mkl_aims_2.sif bash /shared/logsdail_group/sing/sing_fhiaims_script.sh $@'
@@ -41,7 +42,7 @@ def test_run_aims():
             hpc], f"Path incorrect on {hpc}: {expected_paths[hpc]}\n" \
                   f"Currently: {os.environ['ASE_AIMS_COMMAND']}"
 
-        if hpc in ["hawk", 'hawk-amd', 'archer2', 'aws']:
+        if hpc in ["hawk", 'hawk-amd', 'archer2', 'aws', 'falcon', 'isambard3']:
             set_aims_command(hpc, nodes_per_instance=1)
             assert os.environ['ASE_AIMS_COMMAND'] == expected_paths_taskfarm[
                 hpc], f"Path incorrect on {hpc}: {expected_paths_taskfarm[hpc]}\n" \
@@ -53,8 +54,10 @@ def test_run_aims():
 
     for state in range(4):
         # fhi_calc = get_aims_calculator(state)
-        sockets_calc, fhi_calc = get_aims_and_sockets_calculator(dimensions=state, verbose=True)
-
+        if state != 3:
+            sockets_calc, fhi_calc = get_aims_and_sockets_calculator(dimensions=state, verbose=True)
+        else:
+            sockets_calc, fhi_calc = get_aims_and_sockets_calculator(dimensions=state, directory="childir", verbose=True)
         # These are unused - legacy? Remove if no issues.
         #default_params = {'relativistic': ('atomic_zora', 'scalar'),
         #                  'xc': 'pbe',
@@ -67,10 +70,16 @@ def test_run_aims():
 
         # Assertion test that the correct calculators and default arguments are being set
         if ase_env_check('3.22.0'):
-            assert (type(sockets_calc.launch_client.calc) == Aims)
+            from pathlib import Path
+            if fhi_calc.directory != Path(".") and ase_env_check('3.23.0'):
+                from ase.calculators.aims import AimsTemplate
+                # Neither sockets_calc or sockets_calc.launch_client connects to Aims calculator directly with fhi_calc.socketio()
+                assert (sockets_calc.launch_client.__module__ == "ase.calculators.genericfileio")
+            else:
+                assert (type(sockets_calc.launch_client.calc) == Aims)
         else:
             assert (type(sockets_calc.calc) == Aims)
-            
+        
         params = getattr(fhi_calc, 'parameters')
         assert params['relativistic'] == ('atomic_zora', 'scalar')
         assert params['xc'] == 'pbe'

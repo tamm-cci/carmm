@@ -82,7 +82,7 @@ def set_aims_command(hpc='hawk', basis_set='light', defaults=2010, nodes_per_ins
 
     """Set the relevant environment variables based on HPC"""
     os.environ["AIMS_SPECIES_DIR"] = fhi_aims_directory[hpc] + species
-
+    
     if hpc == "falcon":
         if "I_MPI_PMI_LIBRARY" in os.environ:
             print("PMI library is set. Carry on.")
@@ -95,14 +95,13 @@ def set_aims_command(hpc='hawk', basis_set='light', defaults=2010, nodes_per_ins
         #if you see an error like this in your aims.out:
         #'MPI startup(): PMI server not found. Please set I_MPI_PMI_LIBRARY variable if it is not a singleton case.' 
         #See details in Slurm Documentation https://slurm.schedmd.com/mpi_guide.html#intel_mpi.
-
-
+    
     # Define the executable command
     if nodes_per_instance:
         # Check validity of task-farming setup before proceeding.
         # Todo: Add Isambard/Young as needed
-        assert hpc in ["archer2", "hawk", "hawk-amd", "aws"], \
-            "Only ARCHER2, Hawk, and AWS supported for task-farming at the moment."
+        assert hpc in ["archer2", "hawk", "hawk-amd", "aws", "falcon", "isambard3"], \
+            "Only ARCHER2, Hawk, AWS, Falcon, and Isambard3 supported for task-farming at the moment."
         if hpc == "aws":
             assert nodes_per_instance == 1, "FHI-aims does not run on more than one node on AWS at present."
 
@@ -144,6 +143,8 @@ def _get_cpu_command(hpc, nodes_per_instance=None):
         hpc_settings["hawk-amd"]["cpu_command_task_farming"] = f"--nodes={nodes_per_instance} --ntasks={int(hpc_settings['hawk-amd']['cpus_per_node'] * nodes_per_instance)} -d mpirun"
         hpc_settings["archer2"]["cpu_command_task_farming"] = f"--nodes={nodes_per_instance} --ntasks={int(hpc_settings['archer2']['cpus_per_node'] * nodes_per_instance)}"
         hpc_settings["aws"]["cpu_command_task_farming"] = f"--nodes={nodes_per_instance} --ntasks={int(hpc_settings['aws']['cpus_per_node'] * nodes_per_instance)}"
+        hpc_settings["falcon"]["cpu_command_task_farming"] = f"--nodes={nodes_per_instance} --ntasks={int(hpc_settings['falcon']['cpus_per_node'] * nodes_per_instance)}"
+        hpc_settings["isambard3"]["cpu_command_task_farming"] = f"--nodes={nodes_per_instance} --ntasks={int(hpc_settings['isambard3']['cpus_per_node'] * nodes_per_instance)}"
 
     # Check calculation effiency
     if hpc in ["hawk","hawk-amd"]:
