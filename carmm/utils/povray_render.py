@@ -41,13 +41,13 @@ def povray_render(atoms, output='povray', view=False, atom_subs=None,
     if 'radii' not in generic_projection_settings:
         generic_projection_settings['radii'] = 1.0
 
-    if 'colors' not in generic_projection_settings:
-        generic_projection_settings['colors'] = None
-    else:
-        for atom in atoms:
-            sym = atom.symbol
-            if sym not in generic_projection_settings['colors']:
-                generic_projection_settings['colors'][sym] = jmol_colors[atomic_numbers[sym]]
+    # if 'colors' not in generic_projection_settings:
+    #     generic_projection_settings['colors'] = None
+    # else:
+    #     for atom in atoms:
+    #         sym = atom.symbol
+    #         if sym not in generic_projection_settings['colors']:
+    #             generic_projection_settings['colors'][sym] = jmol_colors[atomic_numbers[sym]]
 
     if povray_settings is None:
         povray_settings = {}
