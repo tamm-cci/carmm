@@ -51,8 +51,8 @@ jobs:
         python -m pip install --upgrade ase-gpatom
         python -m pip install --upgrade pytest
         python -m pip install --upgrade pytest-cov
-        python -m pip install --upgrade pymatgen
-        python -m pip install --upgrade phonopy
+        python -m pip install --upgrade "pymatgen<=2025.10.7"  # Before pymatgen-core dependency introduced (which requires python>=3.10)
+        python -m pip install --upgrade "phonopy<4.0.0"  # phonopy>=4.0.0 changes produced output files (gives file not found error for 'thermal_properties.yaml')
         python -m pip install --upgrade mace-torch
         
         # Debug
