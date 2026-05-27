@@ -52,7 +52,7 @@ jobs:
         python -m pip install --upgrade pytest
         python -m pip install --upgrade pytest-cov
         python -m pip install --upgrade pymatgen
-        python -m pip install --upgrade phonopy
+        python -m pip install --upgrade phonopy<=3.5.1
         python -m pip install --upgrade mace-torch
         
         # Debug
