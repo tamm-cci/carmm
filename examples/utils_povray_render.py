@@ -58,7 +58,8 @@ def test_povray_render():
     assert gen_proj_sett['radii'] == radius_list
     np.testing.assert_almost_equal(gen_proj_sett['colors']['H'], np.array([1, 1, 1]), decimal=3)
     np.testing.assert_almost_equal(gen_proj_sett['colors']['N'], np.array([0.188, 0.314, 0.973]), decimal=3)
-    np.testing.assert_almost_equal(gen_proj_sett['colors']['O'], np.array([1, 0.051, 0.051]), decimal=3)
+    # np.testing.assert_almost_equal(gen_proj_sett['colors']['O'], np.array([1, 0.051, 0.051]), decimal=3)
+    # Colors no longer added directly to generic_projection_settings automatically, but specifying 'colors':None still automatically gives jmol colors
 
 
     assert povray_sett == {
@@ -76,7 +77,6 @@ def test_povray_render():
     assert gen_proj_sett == {
         'rotation': '0x,0y,0z',
         'radii': 1.0,
-        'colors': None,
     }
     assert povray_sett == {
         'camera_type': 'orthographic angle 5',

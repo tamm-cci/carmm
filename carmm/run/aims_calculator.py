@@ -1,7 +1,4 @@
-import os
-
-
-def get_aims_calculator(dimensions, spin=None, relativistic=None, k_grid=None, xc="pbe", compute_forces=True, directory='./', **kwargs):
+def get_aims_calculator(dimensions, relativistic=None, k_grid=None, xc="pbe", compute_forces=True, directory='./', **kwargs):
     '''
     Method to return a "default" FHI-aims calculator.
     Note: This file should not be changed without consultation,
@@ -11,8 +8,6 @@ def get_aims_calculator(dimensions, spin=None, relativistic=None, k_grid=None, x
 
         dimensions: Integer
             Determines whether we have a "gas"-phase (0) or "periodic" structure (2 or 3)
-        spin: String
-            Determines if spin is to be invoked for the calculation
         relativistic: String
             Determines what setting for relativity is to be used
         k_grid: List of integers
@@ -30,7 +25,8 @@ def get_aims_calculator(dimensions, spin=None, relativistic=None, k_grid=None, x
             FHI_calc: FHI-aims ASE calculator
        
     '''
-    from ase.calculators.aims import Aims    
+    from ase.calculators.aims import Aims   
+    import os 
 
     # Created dictionary to store arguments
     parameter_dict = {}
@@ -47,11 +43,15 @@ def get_aims_calculator(dimensions, spin=None, relativistic=None, k_grid=None, x
     if dimensions >= 2:
         parameter_dict['k_grid'] = k_grid
 
-    if spin is not None:
-        parameter_dict['spin'] = 'none'
+    # The relativity flag is set as a default to atomic_zora scalar in FHI-aims since Nov 2023 (builds labelled 2311XX)
+    # This means the flag setting here is not necessary for new builds _but_ remains necessary
+    # for anyone using CARMM with FHI-aims versions pre-2311XX, which includes Hawk builds.
+    # In the future, this default settings should be removed here so the code is easier to maintain.
 
     if relativistic is None:
         parameter_dict['relativistic'] = ('atomic_zora', 'scalar')
+    else:
+        parameter_dict['relativistic'] = relativistic
 
     # Changing to check ASE version, as this determines behaviour of calculator
     from carmm.utils.python_env_check import ase_env_check
@@ -148,10 +148,15 @@ def get_aims_and_sockets_calculator(dimensions,
     fhi_calc = get_aims_calculator(dimensions, **kwargs)
     # Add in PIMD command to get sockets working
     fhi_calc.parameters['use_pimd_wrapper']=[host, port]
-
-    # Setup sockets calculator that "wraps" FHI-aims
-    from ase.calculators.socketio import SocketIOCalculator
-    socket_calc = SocketIOCalculator(fhi_calc, log=logfile, port=port)
+    
+    from carmm.utils.python_env_check import ase_env_check
+    from pathlib import Path
+    if fhi_calc.directory != Path(".") and ase_env_check('3.23.0'):
+        socket_calc = fhi_calc.socketio(port=port)
+    else:
+        # Setup sockets calculator that "wraps" FHI-aims
+        from ase.calculators.socketio import SocketIOCalculator
+        socket_calc = SocketIOCalculator(fhi_calc, log=logfile, port=port)
 
     if codata_warning:
         print("You are using i-Pi based socket connectivity between ASE and FHI-aims.")
