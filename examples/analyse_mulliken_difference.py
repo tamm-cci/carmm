@@ -60,4 +60,4 @@ adsorbate_file = args[2] if len(args) >= 3 else None
 # Call the function with command-line arguments
 set_initial_charges(final_file, initial_file, adsorbate_file)
 '''
-set_initial_charge('/data/aims.out', '/data/aims1.out', '/data/geometry.in')
+set_initial_charges('/data/aims.out', '/data/aims1.out', '/data/geometry.in')
