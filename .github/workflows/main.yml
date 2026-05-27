@@ -53,7 +53,7 @@ jobs:
         python -m pip install --upgrade pytest-cov
         python -m pip install --upgrade pymatgen
         #Hardcoded as new version (v4) doesn't work
-        python -m pip install phonopy<4
+        python -m pip install "phonopy<4"
         python -m pip install --upgrade mace-torch
         
         # Debug
