@@ -20,20 +20,18 @@ def test_build_facets_pymatgen():
     #########
     #
     #### Assertion tests ####
-    #from ase.io import read
+    from ase.io import read
 
     ### checking slab termination
-    #atoms = read('data/sym_slab0_8_layer/geometry.in')
-    atoms = surfaces[0]
-    
+    atoms = read('data/sym_slab0_8_layer/geometry.in')
+
     z_coordinates = atoms.get_positions()[:,2]
     import numpy as np
     # the top and bottom atom must be oxygen as it is an oxygen terminated slab
     assert atoms[np.argmax(z_coordinates)].symbol == 'O'
     assert atoms[np.argmin(z_coordinates)].symbol == 'O'
 
-    #atoms = read('data/sym_slab1_8_layer/geometry.in')
-    atoms = surfaces[1]
+    atoms = read('data/sym_slab1_8_layer/geometry.in')
     
     z_coordinates = atoms.get_positions()[:, 2]
     import numpy as np
