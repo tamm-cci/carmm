@@ -11,8 +11,9 @@ def test_build_facets_pymatgen():
     from ase.build import bulk
     bulk_model = bulk('MgO', crystalstructure='rocksalt', cubic=True, a=4.21)
 
-    surface = generate(bulk_model, layers=8, miller_index=(1,1,1), save=True, path='data')
-
+    surfaces = generate(bulk_model, layers=8, miller_index=(1,1,1), save=True, path='data')
+    print(types(surfaces), len(surfaces))
+    
     #### Assertion test for save ####
     import os
     assert(os.path.exists('data/sym_slab0_8_layer/geometry.in'))
@@ -23,7 +24,7 @@ def test_build_facets_pymatgen():
 
     ### checking slab termination
     #atoms = read('data/sym_slab0_8_layer/geometry.in')
-    atoms = surface[0]
+    atoms = surfaces[0]
     
     z_coordinates = atoms.get_positions()[:,2]
     import numpy as np
@@ -32,7 +33,7 @@ def test_build_facets_pymatgen():
     assert atoms[np.argmin(z_coordinates)].symbol == 'O'
 
     #atoms = read('data/sym_slab1_8_layer/geometry.in')
-    atoms = surface[1]
+    atoms = surfaces[1]
     
     z_coordinates = atoms.get_positions()[:, 2]
     import numpy as np
