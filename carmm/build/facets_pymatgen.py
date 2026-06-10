@@ -1,3 +1,10 @@
+def generate_pymatgen():
+	'''Renaming of generate_pymatgen_surface to be consistent with other files - 
+	long term the subroutine this calls should be merged into
+	this subroutine, i.e., there is not a further function call below'''
+
+	return generate_pymatgen_surface(**kwargs)
+
 def generate_pymatgen_surface(bulk_model, layers=2, symmetric=True, miller_index=(1,0,0), vacuum=20, spin=False,
 							  save=False, tol=0.01, path='./', file_format='in'):
 	'''
@@ -44,10 +51,10 @@ def generate_pymatgen_surface(bulk_model, layers=2, symmetric=True, miller_index
 
 	'''
 
-	from ase.io import read
-	from ase.build import surface, make_supercell
+	from ase.build import surface
 	from pymatgen.io.ase import AseAtomsAdaptor
 	from pymatgen.core.surface import SlabGenerator
+								  
 	structure = AseAtomsAdaptor.get_structure(bulk_model)
 	charge_list = list(bulk_model.get_initial_charges())
 	structure.add_oxidation_state_by_site(charge_list)
