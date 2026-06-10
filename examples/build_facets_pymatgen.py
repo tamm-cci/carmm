@@ -12,7 +12,7 @@ def test_build_facets_pymatgen():
     bulk_model = bulk('MgO', crystalstructure='rocksalt', cubic=True, a=4.21)
 
     surfaces = generate(bulk_model, layers=8, miller_index=(1,1,1), save=True, path='data')
-    print(types(surfaces), len(surfaces))
+    print(type(surfaces), len(surfaces))
     
     #### Assertion test for save ####
     import os
