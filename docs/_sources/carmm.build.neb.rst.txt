@@ -4,14 +4,6 @@ carmm.build.neb package
 Submodules
 ----------
 
-carmm.build.neb.WIP\_neb\_preselection module
----------------------------------------------
-
-.. automodule:: carmm.build.neb.WIP_neb_preselection
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 carmm.build.neb.bond\_length\_scan module
 -----------------------------------------
 
