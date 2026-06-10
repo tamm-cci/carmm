@@ -1,4 +1,4 @@
-def generate(**kwargs):
+def generate(self, **kwargs):
 	'''Renaming of generate_pymatgen_surface to be consistent with other files - 
 	long term the subroutine this calls should be merged into
 	this subroutine, i.e., there is not a further function call below'''
