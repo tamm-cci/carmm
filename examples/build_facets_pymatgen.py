@@ -43,4 +43,4 @@ def test_build_facets_pymatgen():
     assert(len(atoms) == 15)
 
 # Run the example
-test_build_pymatgen_surface()
+test_build_facets_pymatgen()
