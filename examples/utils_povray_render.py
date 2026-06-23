@@ -59,6 +59,7 @@ def test_povray_render():
     assert gen_proj_sett['radii'] == radius_list
     np.testing.assert_almost_equal(gen_proj_sett['colors']['H'], np.array([1, 1, 1]), decimal=3)
     np.testing.assert_almost_equal(gen_proj_sett['colors']['N'], np.array([0.188, 0.314, 0.973]), decimal=3)
+    np.testing.assert_almost_equal(gen_proj_sett['colors']['O'], np.array([1, 0.051, 0.051]), decimal=3)
 
     assert povray_sett['camera_type'] == 'orthographic angle 7'
     assert povray_sett['camera_dist'] == 100
