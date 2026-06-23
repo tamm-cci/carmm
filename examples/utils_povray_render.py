@@ -21,6 +21,7 @@ def test_povray_render():
         'N': jmol_colors[atomic_numbers['N']],  # 2. Use default jmol_colors or cpk_colors in ASE
         # 3. Don't specify atom color: function will automatically use default jmol_colors in ASE
     }
+    # Can also specify list with RGB color for each atom index (all indices must have a color)
 
     # Atoms can be made greyscale by converting their RGB colors using the standard RGB luminosity formula:
     # newR = newG = newB = 0.2126R + 0.7152G + 0.0722B
