@@ -22,6 +22,10 @@ def test_povray_render():
         # 3. Don't specify atom color: function will automatically use default jmol_colors in ASE
     }
 
+    # Atoms can be made greyscale by converting their RGB colors using the standard RGB luminosity formula:
+    # newR = newG = newB = 0.2126R + 0.7152G + 0.0722B
+    # e.g. Oxygen jmol RGB = [1, 0.051, 0.051] -> Greyscale oxygen RGB = [0.2528, 0.2528, 0.2528]
+
     radius_scale = 0.8
     radius_list = []
     for atomic_number in atoms.get_atomic_numbers():
