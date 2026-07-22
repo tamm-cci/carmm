@@ -24,7 +24,7 @@ def test_run_workflows_ReactAims_MACE_preopt():
     '''Determine calculation input settings'''
     params = {"xc":"pbe"}
     basis_set = "light"
-    hpc = "hawk"
+    hpc = "falcon"
 
     mace_params = {'model': 'small',
                    'dispersion': False,
