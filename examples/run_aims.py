@@ -21,7 +21,7 @@ def test_run_aims():
 
     expected_paths_taskfarm = {
         'falcon': 'time srun --nodes=1 --ntasks=192 /shared/home2/app_shared/SCWF00007/software/fhi-aims/release/$VERSION/bin/aims.$VERSION.scalapack.mpi.x',
-        'falcon_rome': 'time srun --nodes=1 --ntasks=64 /shared/home2/app_shared/SCWF00007/software/fhi-aims/release/$VERSION/bin/aims.$VERSION.scalapack.mpi.x',
+        'falcon_rome': 'time srun --nodes=1 --ntasks=64 /shared/home2/app_shared/SCWF00007/software/fhi-aims/release/$VERSION/bin/aims.$VERSION.Rome.scalapack.mpi.x',
         'isambard':  '',
         'isambard3': 'time srun --nodes=1 --ntasks=144 /projects/c5b/software/fhi-aims/release/$VERSION/bin/aims.$VERSION.scalapack.mpi.x',
         'archer2':   'srun --cpu-bind=cores --distribution=block:block --hint=nomultithread --nodes=1 --ntasks=128 /work/e05/e05-files-log/shared/software/fhi-aims/bin/aims.$VERSION.scalapack.mpi.x',
