@@ -22,7 +22,7 @@ def test_analyse_counterpoise():
     import os
     os.environ['VERSION'] = "$VERSION"    
 
-    set_aims_command(hpc='hawk', basis_set='light', defaults=2020)
+    set_aims_command(hpc='falcon', basis_set='light', defaults=2020)
     CO = read('data/CO_BSSE/C_monoxide_pbe.traj')
     examples_directory = getcwd()
 
