@@ -61,7 +61,7 @@ jobs:
         python -m pip install --upgrade mace-torch
         # python -m pip install --upgrade "phonopy<4.0.0"  # phonopy>=4.0.0 changes produced output files (gives file not found error for 'thermal_properties.yaml')
         # The above has stopped working on Python3.9 due to changes in scikit-build-core 0.10
-        python -m pip install "scikit-build-core<0.10" # Necessary workaround on Python3.9
+        python -m pip install --upgrade "scikit-build-core<0.10" "nanobind<2.10.0" "numpy" # Necessary workaround on Python3.9, these are phonopy build necessities
         python -m pip install --no-build-isolation "phonopy<4.0.0" # Necessary workaround on Python3.9
       
         # Debug
