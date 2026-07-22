@@ -16,6 +16,12 @@ jobs:
   build:
     # This allows us to find the workflow in checks
     name: ci-test
+
+    # For our records, our HPC systems have the following Python versions that are used:
+    # Young: 3.6 - availability up to 3.11
+    # ARCHER2: 3.6 - availability up to 3.10
+    # Falcon: 3.13
+    # Isambard3: Python 3.11 - availability up to 3.12
     
     # The type of runner that the job will run on
     runs-on: ${{ matrix.os }}
@@ -25,7 +31,7 @@ jobs:
           - os: ubuntu-24.04
             python-version: '3.9'
           - os: ubuntu-24.04
-            python-version: '3.10'
+            python-version: '3.10' 
           - os: ubuntu-24.04
             python-version: '3.13'
         
@@ -52,9 +58,13 @@ jobs:
         python -m pip install --upgrade pytest
         python -m pip install --upgrade pytest-cov
         python -m pip install --upgrade "pymatgen<=2025.10.7"  # Before pymatgen-core dependency introduced (which requires python>=3.10)
-        python -m pip install --upgrade "phonopy<4.0.0"  # phonopy>=4.0.0 changes produced output files (gives file not found error for 'thermal_properties.yaml')
         python -m pip install --upgrade mace-torch
-        
+        # python -m pip install --upgrade "phonopy<4.0.0"  # phonopy>=4.0.0 changes produced output files (gives file not found error for 'thermal_properties.yaml')
+        # The above has stopped working on Python3.9 (phonopy 2.45.1) due to changes in scikit-build-core (which is an unbound dependency)
+        # We have extracted the necessary build environments and then do a manual install. The issue arises in scikit-build-core v1.0
+        python -m pip install --upgrade "scikit-build-core<1.0.0" "nanobind<2.10.0" "setuptools-scm" 
+        python -m pip install --no-build-isolation "phonopy<4.0.0" # Necessary workaround on Python3.9
+      
         # Debug
         python -m pip freeze
     
