@@ -60,8 +60,9 @@ jobs:
         python -m pip install --upgrade "pymatgen<=2025.10.7"  # Before pymatgen-core dependency introduced (which requires python>=3.10)
         python -m pip install --upgrade mace-torch
         # python -m pip install --upgrade "phonopy<4.0.0"  # phonopy>=4.0.0 changes produced output files (gives file not found error for 'thermal_properties.yaml')
-        # The above has stopped working on Python3.9 due to changes in scikit-build-core 0.10
-        python -m pip install --upgrade "scikit-build-core<0.9" # "nanobind<2.10.0" "numpy" "setuptools-scm" # Necessary workaround on Python3.9, these are phonopy build necessities
+        # The above has stopped working on Python3.9 (phonopy 2.45.1) due to changes in scikit-build-core (which is an unbound dependency)
+        # We have extracted the necessary build environments and then do a manual install. The issue arises in scikit-build-core v1.0
+        python -m pip install --upgrade "scikit-build-core<0.12.2" "nanobind<2.10.0" "setuptools-scm" 
         python -m pip install --no-build-isolation "phonopy<4.0.0" # Necessary workaround on Python3.9
       
         # Debug
