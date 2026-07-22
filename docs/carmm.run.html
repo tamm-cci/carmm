@@ -174,7 +174,7 @@ None if a non-periodic model is presented</p></li>
 <span id="carmm-run-aims-path-module"></span><h2>carmm.run.aims_path module<a class="headerlink" href="#module-carmm.run.aims_path" title="Link to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="carmm.run.aims_path.set_aims_command">
-<span class="sig-prename descclassname"><span class="pre">carmm.run.aims_path.</span></span><span class="sig-name descname"><span class="pre">set_aims_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hpc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hawk'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_set</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'light'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2010</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes_per_instance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#carmm.run.aims_path.set_aims_command" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">carmm.run.aims_path.</span></span><span class="sig-name descname"><span class="pre">set_aims_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hpc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'falcon'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_set</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'light'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2010</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes_per_instance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#carmm.run.aims_path.set_aims_command" title="Link to this definition">¶</a></dt>
 <dd><p>Choose supercomputer and basis_set to obtain FHI-aims run command.
 Can be useful to e.g. perform a calculation with a larger basis set
 after a geometry optimisation.</p>
@@ -182,7 +182,7 @@ after a geometry optimisation.</p>
 hpc: String</p>
 <blockquote>
 <div><p>Name of the HPC facility where the jobs are being run
-Options: ‘hawk’, ‘hawk-amd’, ‘falcon’, ‘isambard’, ‘isambard3’, ‘archer2’, ‘young’, ‘aws’, ‘custom’
+Options: ‘falcon’, ‘falcon_rome’, ‘isambard’, ‘isambard3’, ‘archer2’, ‘young’, ‘aws’, ‘custom’
 NOTE 1: ‘custom’ requires the environmental variable “CARMM_AIMS_ROOT_DIRECTORY”
 before running to allow logic of basis set selection, while maintaining
 free choice of basis set folders.
