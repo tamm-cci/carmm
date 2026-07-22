@@ -41,13 +41,16 @@ def povray_render(atoms, output='povray', view=False, atom_subs=None,
     if 'radii' not in generic_projection_settings:
         generic_projection_settings['radii'] = 1.0
 
-    # if 'colors' not in generic_projection_settings:
-    #     generic_projection_settings['colors'] = None
-    # else:
-    #     for atom in atoms:
-    #         sym = atom.symbol
-    #         if sym not in generic_projection_settings['colors']:
-    #             generic_projection_settings['colors'][sym] = jmol_colors[atomic_numbers[sym]]
+    if 'colors' not in generic_projection_settings:
+        colors = [jmol_colors[z] for z in atoms.get_atomic_numbers()]
+        generic_projection_settings['colors'] = colors
+    elif type(generic_projection_settings['colors']) is dict:
+        # Check that colors have been specified for all atom symbols and gives jmol color if not
+        for sym in atoms.symbols:
+            if sym not in generic_projection_settings['colors']:
+                generic_projection_settings['colors'][sym] = jmol_colors[atomic_numbers[sym]]
+    # If generic_projection_settings['colors'] is a list, all atom colors must be specified
+
 
     if povray_settings is None:
         povray_settings = {}
@@ -56,6 +59,9 @@ def povray_render(atoms, output='povray', view=False, atom_subs=None,
         povray_settings['camera_type'] = 'orthographic angle 5'
     if 'camera_dist' not in povray_settings:
         povray_settings['camera_dist'] = 50
+
+    if 'transmittances' not in povray_settings:
+        povray_settings['transmittances'] = [0] * len(atoms)
 
     if view:
         povray_settings['display'] = True
