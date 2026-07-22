@@ -71,14 +71,15 @@ def set_aims_command(hpc='falcon', basis_set='light', defaults=2010, nodes_per_i
                     "apptainer": "apptainer exec " + fhi_aims_directory["aws"] + "mkl_aims_2.sif bash " + \
                                  fhi_aims_directory["aws"] + "sing_fhiaims_script.sh $@"
                     }
-
+        
+    # Necessary due to executable name difference for Falcon/Rome. This is a hack - should be neater
+    if hpc == "falcon_rome":
+        executable_d["compiled"] = "bin/aims."+fhi_aims_version+".Rome.scalapack.mpi.x"
+        
     '''Handle compiled and containerized FHIaims versions'''
     if hpc == "aws":
         executable = executable_d["apptainer"]
     elif hpc != "custom":
-        # Necessary due to executable name difference for Falcon/Rome
-        if hpc == "falcon_rome":
-            executable_d["compiled"].replace(fhi_aims_version, fhi_aims_version+".Rome")
         executable = fhi_aims_directory[hpc] + executable_d["compiled"]
 
     """Set the relevant environment variables based on HPC"""
