@@ -1,11 +1,4 @@
-def generate(bulk_model, **kwargs):
-	'''Renaming of generate_pymatgen_surface to be consistent with other files - 
-	long term the subroutine this calls should be merged into
-	this subroutine, i.e., there is not a further function call below'''
-
-	return generate_pymatgen_surface(bulk_model, **kwargs)
-
-def generate_pymatgen_surface(bulk_model, layers=2, symmetric=True, miller_index=(1,0,0), vacuum=20, spin=False,
+def generate(bulk_model, layers=2, symmetric=True, miller_index=(1,0,0), vacuum=20, spin=False,
 							  save=False, tol=0.01, path='./', file_format='in'):
 	'''
 
@@ -50,8 +43,8 @@ def generate_pymatgen_surface(bulk_model, layers=2, symmetric=True, miller_index
 		file io writer. Please check ASE's documentation for supported file format.
 
 	'''
-
-	from ase.build import surface
+    # Unused?
+	# from ase.build import surface
 	from pymatgen.io.ase import AseAtomsAdaptor
 	from pymatgen.core.surface import SlabGenerator
 								  
