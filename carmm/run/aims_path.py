@@ -137,7 +137,7 @@ def _get_cpu_command(hpc, nodes_per_instance=None):
         "falcon_rome": { "cpus_per_node": 64, "cpu_command": "", },
         "isambard": { "cpus_per_node": 64, "cpu_command": f"-n $NPROCS", },
         "isambard3": { "cpus_per_node": 144, "cpu_command": "", },
-        "young": { "cpus_per_node": 64, "cpu_command": "", },
+        "young": { "cpus_per_node": 40, "cpu_command": "", },
         "young-ng": { "cpus_per_node": 40, "cpu_command": "", },
         "archer2": { "cpus_per_node": 128, "cpu_command": "", },
         "aws": { "cpus_per_node": 72, "cpu_command": "",  }
