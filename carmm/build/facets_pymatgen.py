@@ -1,4 +1,4 @@
-def generate_pymatgen_surface(bulk_model, layers=2, symmetric=True, miller_index=(1,0,0), vacuum=20, spin=False,
+def generate(bulk_model, layers=2, symmetric=True, miller_index=(1,0,0), vacuum=20, spin=False,
 							  save=False, tol=0.01, path='./', file_format='in'):
 	'''
 
@@ -43,11 +43,11 @@ def generate_pymatgen_surface(bulk_model, layers=2, symmetric=True, miller_index
 		file io writer. Please check ASE's documentation for supported file format.
 
 	'''
-
-	from ase.io import read
-	from ase.build import surface, make_supercell
+    # Unused?
+	# from ase.build import surface
 	from pymatgen.io.ase import AseAtomsAdaptor
 	from pymatgen.core.surface import SlabGenerator
+								  
 	structure = AseAtomsAdaptor.get_structure(bulk_model)
 	charge_list = list(bulk_model.get_initial_charges())
 	structure.add_oxidation_state_by_site(charge_list)

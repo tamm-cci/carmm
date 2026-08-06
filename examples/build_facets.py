@@ -8,7 +8,7 @@ This is useful when making surfaces for adsorption chemistry
 TODO: Link with pymatgen, as that has extensive functionality?
 '''
 
-def test_build_surface():
+def test_build_facets():
 
     #### Functionality to create all surfaces ####
     from carmm.build.facets import generate
@@ -24,4 +24,4 @@ def test_build_surface():
     assert(slabs[0].get_volume() - 644.5655232 < 1e-6)
 
 # Run the example
-test_build_surface()
+test_build_facets()
