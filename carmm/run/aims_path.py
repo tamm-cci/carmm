@@ -7,7 +7,7 @@ def set_aims_command(hpc='falcon', basis_set='light', defaults=2010, nodes_per_i
     Parameters:
     hpc: String
         Name of the HPC facility where the jobs are being run
-        Options: 'falcon', 'falcon_rome', 'isambard', 'isambard3', 'archer2', 'young', 'aws', 'custom'
+        Options: 'falcon', 'falcon_rome', 'isambard', 'isambard3', 'archer2', 'young', 'young-ng', 'aws', 'custom'
         NOTE 1: 'custom' requires the environmental variable "CARMM_AIMS_ROOT_DIRECTORY"
         before running to allow logic of basis set selection, while maintaining
         free choice of basis set folders.
@@ -46,6 +46,7 @@ def set_aims_command(hpc='falcon', basis_set='light', defaults=2010, nodes_per_i
         "isambard3": "time srun",
         "archer2": "srun --cpu-bind=cores --distribution=block:block --hint=nomultithread",
         "young": "gerun",
+        "young-ng": "srun",
         "aws": "time srun --mpi=pmi2 --hint=nomultithread --distribution=block:block",
         "custom": ""
     }
@@ -63,18 +64,24 @@ def set_aims_command(hpc='falcon', basis_set='light', defaults=2010, nodes_per_i
         "isambard3": "/projects/c5b/software/fhi-aims/release/" + fhi_aims_version + "/",
         "archer2": "/work/e05/e05-files-log/shared/software/fhi-aims/",
         "young": "/home/mmm0170/Software/fhi-aims/",
+        "young-ng": "/home/mmm0170/Software/fhi-aims/",
         "aws": "/shared/logsdail_group/sing/",
         "custom": custom_root_dir
     }
 
-    executable_d = {"compiled": "bin/aims."+fhi_aims_version+".scalapack.mpi.x",
+    # Necessary due to executable name differences for heterogeneous architectures (different hardware/software)
+    # This is a dirty hack - should be tidier
+    # Falcon - Genoa (default) or Rome.
+    # Young - young (default) or young-ng
+
+    extra_text = ""
+    if hpc == "falcon_rome": extra_text = ".Rome"
+    if hpc == "young-ng": extra_text = ".young-ng"
+
+    executable_d = {"compiled": "bin/aims."+fhi_aims_version+extra_text+".scalapack.mpi.x",
                     "apptainer": "apptainer exec " + fhi_aims_directory["aws"] + "mkl_aims_2.sif bash " + \
                                  fhi_aims_directory["aws"] + "sing_fhiaims_script.sh $@"
                     }
-        
-    # Necessary due to executable name difference for Falcon/Rome. This is a hack - should be neater
-    if hpc == "falcon_rome":
-        executable_d["compiled"] = "bin/aims."+fhi_aims_version+".Rome.scalapack.mpi.x"
         
     '''Handle compiled and containerized FHIaims versions'''
     if hpc == "aws":
@@ -131,6 +138,7 @@ def _get_cpu_command(hpc, nodes_per_instance=None):
         "isambard": { "cpus_per_node": 64, "cpu_command": f"-n $NPROCS", },
         "isambard3": { "cpus_per_node": 144, "cpu_command": "", },
         "young": { "cpus_per_node": 64, "cpu_command": "", },
+        "young-ng": { "cpus_per_node": 40, "cpu_command": "", },
         "archer2": { "cpus_per_node": 128, "cpu_command": "", },
         "aws": { "cpus_per_node": 72, "cpu_command": "",  }
     }
