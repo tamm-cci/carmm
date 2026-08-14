@@ -32,6 +32,9 @@ def povray_render(atoms, output='povray', view=False, atom_subs=None,
     A .png file of the atoms object, visualised in Povray with the desired settings
     """
 
+    if atom_subs is not None:
+        atoms = atom_sub(atoms, atom_subs)
+
     # Default visual settings
     if generic_projection_settings is None:
         generic_projection_settings = {}
@@ -80,9 +83,6 @@ def povray_render(atoms, output='povray', view=False, atom_subs=None,
         print('Ultra Wide Angle camera type is much less supported. e.g. Unable to zoom in/out.\n'
               'Instead, try the "orthographic angle X" camera type, where X=5 by default.\n'
               'Increasing/decreasing X has the effect of zooming in/out, respectively.')
-
-    if atom_subs is not None:
-        atoms = atom_sub(atoms, atom_subs)
 
     povobj = write(f'{output}.pov', atoms, **generic_projection_settings, povray_settings=povray_settings)
     try:
