@@ -1,4 +1,4 @@
-def set_aims_command(hpc='hawk', basis_set='light', defaults=2010, nodes_per_instance=None):
+def set_aims_command(hpc='falcon', basis_set='light', defaults=2010, nodes_per_instance=None):
     """
     Choose supercomputer and basis_set to obtain FHI-aims run command.
     Can be useful to e.g. perform a calculation with a larger basis set
@@ -7,7 +7,7 @@ def set_aims_command(hpc='hawk', basis_set='light', defaults=2010, nodes_per_ins
     Parameters:
     hpc: String
         Name of the HPC facility where the jobs are being run
-        Options: 'hawk', 'hawk-amd', 'falcon', 'isambard', 'isambard3', 'archer2', 'young', 'aws', 'custom'
+        Options: 'falcon', 'falcon_rome', 'isambard', 'isambard3', 'archer2', 'young', 'young-ng', 'aws', 'custom'
         NOTE 1: 'custom' requires the environmental variable "CARMM_AIMS_ROOT_DIRECTORY"
         before running to allow logic of basis set selection, while maintaining
         free choice of basis set folders.
@@ -40,13 +40,13 @@ def set_aims_command(hpc='hawk', basis_set='light', defaults=2010, nodes_per_ins
     species = "species_defaults/" + "defaults_" + str(defaults) + "/" + basis_set
 
     preamble = {
-        "hawk": "time srun",
-        "hawk-amd": "time srun",
         "falcon": "time srun", 
+        "falcon_rome": "time srun",
         "isambard": "time aprun",
         "isambard3": "time srun",
         "archer2": "srun --cpu-bind=cores --distribution=block:block --hint=nomultithread",
         "young": "gerun",
+        "young-ng": "srun",
         "aws": "time srun --mpi=pmi2 --hint=nomultithread --distribution=block:block",
         "custom": ""
     }
@@ -58,22 +58,31 @@ def set_aims_command(hpc='hawk', basis_set='light', defaults=2010, nodes_per_ins
     fhi_aims_version = os.environ['VERSION']
 
     fhi_aims_directory = {
-        "hawk": "/apps/local/projects/scw1057/software/fhi-aims/",
-        "hawk-amd": "/apps/local/projects/scw1057/software/fhi-aims/",
         "falcon": "/shared/home2/app_shared/SCWF00007/software/fhi-aims/release/" + fhi_aims_version + "/",
+        "falcon_rome": "/shared/home2/app_shared/SCWF00007/software/fhi-aims/release/" + fhi_aims_version + "/",
         "isambard": "/home/ca-alogsdail/fhi-aims-gnu/",
         "isambard3": "/projects/c5b/software/fhi-aims/release/" + fhi_aims_version + "/",
         "archer2": "/work/e05/e05-files-log/shared/software/fhi-aims/",
         "young": "/home/mmm0170/Software/fhi-aims/",
+        "young-ng": "/home/mmm0170/Software/fhi-aims/",
         "aws": "/shared/logsdail_group/sing/",
         "custom": custom_root_dir
     }
 
-    executable_d = {"compiled": "bin/aims."+fhi_aims_version+".scalapack.mpi.x",
+    # Necessary due to executable name differences for heterogeneous architectures (different hardware/software)
+    # This is a dirty hack - should be tidier
+    # Falcon - Genoa (default) or Rome.
+    # Young - young (default) or young-ng
+
+    extra_text = ""
+    if hpc == "falcon_rome": extra_text = ".Rome"
+    if hpc == "young-ng": extra_text = ".young-ng"
+
+    executable_d = {"compiled": "bin/aims."+fhi_aims_version+extra_text+".scalapack.mpi.x",
                     "apptainer": "apptainer exec " + fhi_aims_directory["aws"] + "mkl_aims_2.sif bash " + \
                                  fhi_aims_directory["aws"] + "sing_fhiaims_script.sh $@"
                     }
-
+        
     '''Handle compiled and containerized FHIaims versions'''
     if hpc == "aws":
         executable = executable_d["apptainer"]
@@ -83,13 +92,12 @@ def set_aims_command(hpc='hawk', basis_set='light', defaults=2010, nodes_per_ins
     """Set the relevant environment variables based on HPC"""
     os.environ["AIMS_SPECIES_DIR"] = fhi_aims_directory[hpc] + species
     
-    if hpc == "falcon":
+    if hpc in ["falcon", "falcon_rome"]:
         if "I_MPI_PMI_LIBRARY" in os.environ:
             print("PMI library is set. Carry on.")
         else:
             os.environ["I_MPI_PMI_LIBRARY"] = "/usr/lib64/libpmi.so"
             print("Set PMI library path to ", os.environ["I_MPI_PMI_LIBRARY"])
-
 
         #Note: pointing manually to Slurm's PMI-1 or PMI-2 library is necessary for using srun with IPMI
         #if you see an error like this in your aims.out:
@@ -100,8 +108,8 @@ def set_aims_command(hpc='hawk', basis_set='light', defaults=2010, nodes_per_ins
     if nodes_per_instance:
         # Check validity of task-farming setup before proceeding.
         # Todo: Add Isambard/Young as needed
-        assert hpc in ["archer2", "hawk", "hawk-amd", "aws", "falcon", "isambard3"], \
-            "Only ARCHER2, Hawk, AWS, Falcon, and Isambard3 supported for task-farming at the moment."
+        assert hpc in ["archer2", "aws", "falcon", "falcon_rome", "isambard3"], \
+            "Only ARCHER2, AWS, Falcon, and Isambard3 supported for task-farming at the moment."
         if hpc == "aws":
             assert nodes_per_instance == 1, "FHI-aims does not run on more than one node on AWS at present."
 
@@ -125,13 +133,12 @@ def _get_cpu_command(hpc, nodes_per_instance=None):
 
     # This dictionary contains settings related to each HPC infrastructure
     hpc_settings = {
-        "hawk": { "cpus_per_node": 40, "cpu_command": f"--nodes=$SLURM_NNODES --ntasks=$SLURM_NTASKS -d mpirun", },
-        "hawk-amd": { "cpus_per_node": 64, "cpu_command": f"--nodes=$SLURM_NNODES --ntasks=$SLURM_NTASKS -d mpirun", },
-        # Untested, taken from Hawk
         "falcon": { "cpus_per_node": 192, "cpu_command": "", },
+        "falcon_rome": { "cpus_per_node": 64, "cpu_command": "", },
         "isambard": { "cpus_per_node": 64, "cpu_command": f"-n $NPROCS", },
         "isambard3": { "cpus_per_node": 144, "cpu_command": "", },
-        "young": { "cpus_per_node": 64, "cpu_command": "", },
+        "young": { "cpus_per_node": 40, "cpu_command": "", },
+        "young-ng": { "cpus_per_node": 40, "cpu_command": "", },
         "archer2": { "cpus_per_node": 128, "cpu_command": "", },
         "aws": { "cpus_per_node": 72, "cpu_command": "",  }
     }
@@ -139,15 +146,15 @@ def _get_cpu_command(hpc, nodes_per_instance=None):
     # This content adds capabilities relating to task-farming.
     # Todo: Extend for Isambard/Young
     if nodes_per_instance:
-        hpc_settings["hawk"]["cpu_command_task_farming"] = f"--nodes={nodes_per_instance} --ntasks={int(hpc_settings['hawk']['cpus_per_node'] * nodes_per_instance)} -d mpirun"
-        hpc_settings["hawk-amd"]["cpu_command_task_farming"] = f"--nodes={nodes_per_instance} --ntasks={int(hpc_settings['hawk-amd']['cpus_per_node'] * nodes_per_instance)} -d mpirun"
+        # Falcon_Rome settings are old Hawk-AMD renamed (as these are the same nodes)
         hpc_settings["archer2"]["cpu_command_task_farming"] = f"--nodes={nodes_per_instance} --ntasks={int(hpc_settings['archer2']['cpus_per_node'] * nodes_per_instance)}"
         hpc_settings["aws"]["cpu_command_task_farming"] = f"--nodes={nodes_per_instance} --ntasks={int(hpc_settings['aws']['cpus_per_node'] * nodes_per_instance)}"
         hpc_settings["falcon"]["cpu_command_task_farming"] = f"--nodes={nodes_per_instance} --ntasks={int(hpc_settings['falcon']['cpus_per_node'] * nodes_per_instance)}"
+        hpc_settings["falcon_rome"]["cpu_command_task_farming"] = f"--nodes={nodes_per_instance} --ntasks={int(hpc_settings['falcon_rome']['cpus_per_node'] * nodes_per_instance)}"
         hpc_settings["isambard3"]["cpu_command_task_farming"] = f"--nodes={nodes_per_instance} --ntasks={int(hpc_settings['isambard3']['cpus_per_node'] * nodes_per_instance)}"
 
     # Check calculation effiency
-    if hpc in ["hawk","hawk-amd"]:
+    if hpc in ["falcon_rome"]:
         # Necessary import
         import os
         
