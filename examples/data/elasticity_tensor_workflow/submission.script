@@ -1,0 +1,5 @@
+'''
+Dummy submission.script file for CI tests. Replace this with the submission script file for the supercomputer of your choice
+'''
+echo 'Dummy submission.script file for CI tests. Replace this with the submission script file for the supercomputer of your choice'
+
