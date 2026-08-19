@@ -1,3 +1,5 @@
+LINE_NOT_FOUND = object()
+
 def counterpoise_calc(complex_struc, a_id, b_id, fhi_calc=None, a_name=None, b_name=None,
                       verbose=False, dry_run=False):
     """
@@ -89,8 +91,10 @@ def counterpoise_calc(complex_struc, a_id, b_id, fhi_calc=None, a_name=None, b_n
                                                                                 fhi_calc.template.outputname)
                 structures_cp[index].calc.atoms = structures_cp[index]
 
+            calculate_energy_ghost_compatible(calc=structures_cp[index].calc, atoms=structures_cp[index],
+                                              ghosts=ghosts_lists_cp[index], dry_run=dry_run)
             # Get the energy from the converged output.
-            energy_i = structures_cp[index].get_potential_energy()
+            energy_i = total_energy(str(fhi_calc.directory) + "/" + species_list[index] + '.out')
             energies.append(energy_i)
 
     # Counterpoise correction for basis set superposition error. See docstring for the formula.
@@ -195,22 +199,28 @@ def calculate_energy_ghost_compatible(calc, atoms=None, properties=['energy'],
         dry_run: flag for CI-test.
 
     """
-    from ase.calculators.calculator import Calculator
-    import subprocess, os
-    Calculator.calculate(calc, atoms, properties, system_changes)
-    # Write inputfiles. Scaled positions does not work with empty sites.
-    calc.write_input(calc.atoms, properties, system_changes, ghosts=ghosts, scaled=False)
-    command = calc.command
+    from carmm.utils.python_env_check import ase_env_check
+    if not ase_env_check('3.23.0'):
+        from ase.calculators.calculator import Calculator
+        import subprocess, os
+        Calculator.calculate(calc, atoms, properties, system_changes)
+        # Write inputfiles. Scaled positions does not work with empty sites.
+        calc.write_input(calc.atoms, properties, system_changes, ghosts=ghosts, scaled=False)
+        command = calc.command
 
-    if dry_run:  # Only for CI tests
-        command = ''  # Used to be 'ls'
-    converged = False
-    if os.path.exists(calc.directory+'/'+calc.outfilename):
-        converged = calc.read_convergence()
-    if (not converged) or dry_run:
-        subprocess.check_call(command, shell=True, cwd=calc.directory)
+        if dry_run:  # Only for CI tests
+            command = ''  # Used to be 'ls'
+        converged = False
+        if os.path.exists(calc.directory+'/'+calc.outfilename):
+            converged = calc.read_convergence()
+        if (not converged) or dry_run:
+            subprocess.check_call(command, shell=True, cwd=calc.directory)
 
-    calc.read_results()
+        calc.read_results()
+    else:
+        # THIS WON'T WORK BECAUSE OF read_results.  calc.calculate(atoms, properties, system_changes)
+        calc.write_inputfiles(atoms, properties)
+        calc.template.execute(calc.directory, calc.profile)
 
 
 # Lazy work around
@@ -224,3 +234,30 @@ def get_energy_dryrun(dir, outputname):
             energy_line = line
 
     return float(energy_line.split()[5])
+
+
+def is_metallic(lines):
+    """Checks the outputfile to see if the chunk corresponds
+    to a metallic system"""
+    from carmm.analyse.txtfile_operations import reverse_search_for
+
+    line_start = reverse_search_for(["material is metallic within the approximate finite "
+                                    "broadening function (occupation_type)"], lines)
+    return line_start != LINE_NOT_FOUND
+
+def total_energy(filename):
+    """Parse the energy from the aims.out file"""
+    from carmm.analyse.txtfile_operations import reverse_search_for
+    with open(filename, "r") as file:
+        lines = [line for line in file]
+
+    if is_metallic(lines):
+        line_idx = reverse_search_for(["Total energy corrected"], lines)
+    else:
+        line_idx = reverse_search_for(["Total energy uncorrected"], lines)
+    
+    if line_idx == LINE_NOT_FOUND:
+        raise ValueError("No energy is associated with the structure.")
+
+    return float(lines[line_idx].split()[5])
+
