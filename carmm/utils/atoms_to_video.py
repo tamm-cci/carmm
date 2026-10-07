@@ -3,7 +3,7 @@ from ase.visualize import view
 from ase.io.trajectory import TrajectoryWriter
 import os
 from PIL import Image
-import cv2
+import cv2  # from opencv-python
 from carmm.utils.povray_render import povray_render, atom_sub
 
 

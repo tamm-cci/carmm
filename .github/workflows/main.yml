@@ -64,6 +64,7 @@ jobs:
         # We have extracted the necessary build environments and then do a manual install. The issue arises in scikit-build-core v1.0
         python -m pip install --upgrade "scikit-build-core<1.0.0" "nanobind<2.10.0" "setuptools-scm" 
         python -m pip install --no-build-isolation "phonopy<4.0.0" # Necessary workaround on Python3.9
+        python -m pip install opencv-python
       
         # Debug
         python -m pip freeze

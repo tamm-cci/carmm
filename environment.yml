@@ -1,4 +1,4 @@
-# This is a basic file to enable use of binder with the Jupyer notebooks
+# This is a basic file to enable use of binder with the Jupyter notebooks
 # embedded in examples/notebooks
 name: notebooks
 channels:
@@ -12,3 +12,4 @@ dependencies:
     - ase
     - scipy
     - matplotlib
+    - opencv-python
