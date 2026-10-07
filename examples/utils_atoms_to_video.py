@@ -81,8 +81,8 @@ def test_atoms_to_gif():
     }
 
 
-# test_atoms_to_gif()
+test_atoms_to_gif()
 test_atoms_to_mp4()
 
 os.system('rm nh3-h3o.mp4')
-# os.system('rm nh3-h3o.gif')
+os.system('rm nh3-h3o.gif')
