@@ -77,29 +77,30 @@ def atoms_to_mp4(atoms, mp4_file, povray=True, generic_projection_settings=None,
         k = 0
         for file in filenames:
             im = Image.open(file)
-            # im_resized = im.resize((mean_width, mean_height))
             im_resized = im.resize((mean_width, mean_height), Image.LANCZOS)
             im_resized.save(file, 'png', quality=95)
             k += 1
             print(f'frame resizing: {k}/{steps} ({int(100 * k / steps)}%)')
 
+    try:
+        # Set frame from the first image
+        frame = cv2.imread(filenames[0])
+        height, width, layers = frame.shape
 
-    # Set frame from the first image
-    frame = cv2.imread(filenames[0])
-    height, width, layers = frame.shape
+        # filename, fourcc, fps, size
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        video = cv2.VideoWriter(f'{mp4_file}.mp4', fourcc, frames_per_second, (width, height))
 
-    # filename, fourcc, fps, size
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video = cv2.VideoWriter(f'{mp4_file}.mp4', fourcc, frames_per_second, (width, height))
+        # Appending images to video
+        for image in filenames:
+            video.write(cv2.imread(image))
 
-    # Appending images to video
-    for image in filenames:
-        video.write(cv2.imread(image))
-
-    # Release the video file
-    video.release()
-    cv2.destroyAllWindows()
-    print('Video Complete!')
+        # Release the video file
+        video.release()
+        cv2.destroyAllWindows()
+        print('Video Complete!')
+    except AttributeError as err:
+        print(f'{err}: No images')
 
     if not keep_temp_files:
         for n in indices:
