@@ -85,9 +85,19 @@ def test_atoms_to_gif():
         'save_all': True,
     }
 
+    os.system('cp data/NH3-H3O_traj/nh3-h3o.*.png .')
+    filenames_gif, _, _ = gifmaker('nh3-h3o', filenames=filenames[:11], frames_per_second=1, pause_time=0, gif_options=gif_options,
+             indices=indices[:11], keep_temp_files=False)
 
-# test_atoms_to_gif()
+    assert len(filenames_gif) == 11
+    assert os.path.exists('nh3-h3o.gif')
+
+
+test_atoms_to_gif()
 test_atoms_to_mp4()
 
-# os.system('rm nh3-h3o.gif')
+os.system('rm nh3-h3o.*.ini')
+os.system('rm nh3-h3o.*.pov')
+os.system('rm nh3-h3o.*.png')
+os.system('rm nh3-h3o.gif')
 os.system('rm nh3-h3o.mp4')
