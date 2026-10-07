@@ -6,6 +6,29 @@ into a gif visualised in povray.
 
 import os
 
+def test_atoms_to_mp4():
+    from carmm.utils.atoms_to_video import atoms_to_mp4
+    from ase.io import read
+
+    atoms = read('data/NH3-H3O_traj/nh3-h3o.traj@:')
+    filename = 'nh3-h3o'
+    mean_width, mean_height, steps, filenames = atoms_to_mp4(atoms, filename, atom_subs=[['N', 'C'], ['O', 'N']], keep_temp_files=True)
+
+    assert mean_width == 36
+    assert mean_height == 37
+    assert steps == 41
+    assert atoms[11].symbols[4] == 'C'  # Random frame
+    assert atoms[38].symbols[0] == 'N'  # Random frame
+    assert filenames[7] == 'nh3-h3o.07.png'  # Random frame
+
+    mean_width, mean_height, steps, filenames = atoms_to_mp4(atoms, filename, povray=False, image_rescaling=False,
+                                                             keep_temp_files=False)
+
+    assert mean_width == 0
+    assert mean_height == 0
+    assert steps == 41
+    assert filenames[7] == 'nh3-h3o.07.png'  # Random frame
+
 def test_atoms_to_gif():
     from carmm.utils.atoms_to_video import atoms_to_gif, gifmaker
     from ase.io import read
@@ -58,6 +81,8 @@ def test_atoms_to_gif():
     }
 
 
-test_atoms_to_gif()
+# test_atoms_to_gif()
+test_atoms_to_mp4()
 
-os.system('rm nh3-h3o.gif')
+os.system('rm nh3-h3o.mp4')
+# os.system('rm nh3-h3o.gif')
