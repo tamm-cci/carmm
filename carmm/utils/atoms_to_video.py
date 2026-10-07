@@ -162,10 +162,13 @@ def atoms_to_gif(atoms, file, automatic=False, generic_projection_settings=None,
     filenames = [f'{file}.{index}.png' for index in indices]
 
     if automatic:
+        j = 0
         for frame in range(steps):
             frame_atoms = atoms[frame]
             povray_render(frame_atoms, output=f'{file}.{indices[frame]}', view=False, atom_subs=atom_subs,
                           generic_projection_settings=generic_projection_settings, povray_settings=povray_settings)
+            j += 1
+            print(f'povray_render: {j}/{steps} ({int(100 * j / steps)}%)')
     else:
         if atom_subs is not None:
             for frame in range(steps):
